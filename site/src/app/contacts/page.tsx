@@ -5,7 +5,7 @@ import { company } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Контакты",
-  description: "Контакты GastroPrime и черновик будущей страницы связи без Tilda и технических хвостов.",
+  description: "Контакты Gastroprime и черновик будущей страницы связи без Tilda и технических хвостов.",
 };
 
 export default function ContactsPage() {
@@ -26,7 +26,7 @@ export default function ContactsPage() {
             <p><span className="font-semibold text-slate-950">Юр. лицо:</span> {company.legalName}</p>
           </div>
         </div>
-        <LeadForm title="Связаться с GastroPrime" description="В этой форме можно будет разделять лиды: офис, склад, стройка, производство, госучреждение или рационы." />
+        <LeadForm title="Связаться с Gastroprime" description="В этой форме можно будет разделять лиды: офис, склад, стройка, производство, госучреждение или рационы." />
       </div>
     </main>
   );

@@ -279,7 +279,7 @@ function ClientDashboard({ user, token, onLogout, onUserUpdate, impersonatorUser
 }
 
 function AdminDashboard({ user, token, onLogout }: { user: any, token: string, onLogout: () => void }) {
-  const [activeTab, setActiveTab] = useState<'analytics' | 'companies' | 'team' | 'reconciliation' | 'invoices' | 'categories' | 'dishes' | 'users' | 'planning' | 'client-plans' | 'crm' | 'logistics' | 'kitchen'>('analytics')
+  const [activeTab, setActiveTab] = useState<'analytics' | 'companies' | 'team' | 'reconciliation' | 'invoices' | 'categories' | 'dishes' | 'users' | 'planning' | 'client-plans' | 'crm' | 'logistics' | 'kitchen' | 'ANOTHER_TAB'>('analytics')
   return (
     <div className="gp-shell">
       <div className="gp-header">
@@ -305,6 +305,7 @@ function AdminDashboard({ user, token, onLogout }: { user: any, token: string, o
         <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
         <div onClick={() => setActiveTab('logistics')} className={`gp-tab ${activeTab === 'logistics' ? 'gp-tab--active' : ''}`}>🚚 Логистика</div>
         <div onClick={() => setActiveTab('kitchen')} className={`gp-tab ${activeTab === 'kitchen' ? 'gp-tab--active' : ''}`}>🍲 Сводка</div>
+        <div onClick={() => setActiveTab('ANOTHER_TAB')} className={`gp-tab ${activeTab === 'ANOTHER_TAB' ? 'gp-tab--active' : ''}`}>📝 Контент сайта</div>
         <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
       </div>
       <div className="gp-content">
@@ -352,6 +353,7 @@ function ManagerDashboard({ user, token, onLogout, onImpersonate }: { user: any,
         <div onClick={() => setActiveTab('categories')} className={`gp-tab ${activeTab === 'categories' ? 'gp-tab--active' : ''}`}>🗂️ Категории</div>
         <div onClick={() => setActiveTab('dishes')} className={`gp-tab ${activeTab === 'dishes' ? 'gp-tab--active' : ''}`}>🍳 Блюда</div>
         <div onClick={() => setActiveTab('kitchen')} className={`gp-tab ${activeTab === 'kitchen' ? 'gp-tab--active' : ''}`}>🍲 Сводка</div>
+        <div onClick={() => setActiveTab('ANOTHER_TAB')} className={`gp-tab ${activeTab === 'ANOTHER_TAB' ? 'gp-tab--active' : ''}`}>📝 Контент сайта</div>
         <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
         <div onClick={() => setActiveTab('help')} className={`gp-tab ${activeTab === 'help' ? 'gp-tab--active' : ''}`}>📘 Инструкция</div>
       </div>

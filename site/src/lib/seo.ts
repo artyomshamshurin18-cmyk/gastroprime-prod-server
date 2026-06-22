@@ -1,4 +1,4 @@
-export const SITE_NAME = "GastroPrime";
+export const SITE_NAME = "Gastroprime";
 export const SITE_URL = "https://gastroprime.ru";
 export const SITE_PHONE = "+79166847288";
 export const SITE_EMAIL = "info@gastroprime.ru";

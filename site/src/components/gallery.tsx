@@ -2,14 +2,41 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-// Статический массив фото
 const PHOTOS = [
-  "/file_179.jpg", "/file_180.jpg", "/file_181.jpg",
-  "/file_175.jpg", "/file_176.jpg", "/file_177.jpg",
-  "/file_171.jpg", "/file_172.jpg", "/file_173.jpg",
-  "/file_174.jpg", "/file_178.jpg", "/file_150.jpg",
-  "/file_151.jpg", "/file_152.jpg", "/file_153.jpg",
-  "/file_154.jpg"
+  "/events/event-001.png",
+  "/events/event-002.png",
+  "/events/event-003.png",
+  "/events/event-004.png",
+  "/events/event-005.png",
+  "/events/event-006.png",
+  "/events/event-007.png",
+  "/events/event-008.png",
+  "/events/event-009.png",
+  "/events/event-010.png",
+  "/events/event-011.png",
+  "/events/event-012.png",
+  "/events/event-013.png",
+  "/events/event-014.png",
+  "/events/event-015.png",
+  "/events/event-016.png",
+  "/events/event-017.png",
+  "/events/event-018.png",
+  "/events/event-019.png",
+  "/events/event-020.png",
+  "/events/event-021.png",
+  "/events/event-022.png",
+  "/events/event-023.png",
+  "/events/event-024.png",
+  "/events/event-025.png",
+  "/events/event-026.png",
+  "/events/event-027.png",
+  "/events/event-028.png",
+  "/events/event-029.png",
+  "/events/event-030.png",
+  "/events/event-031.png",
+  "/events/event-032.png",
+  "/events/event-033.png",
+  "/events/event-034.png",
 ];
 
 export default function Gallery() {
@@ -58,7 +85,6 @@ export default function Gallery() {
                 </button>
               );
             })}
-            {/* Заполняем пустые ячейки, если строка неполная */}
             {row.length < 4 &&
               Array.from({ length: 4 - row.length }).map((_, ci) => (
                 <div key={"empty-" + ci} />
@@ -67,7 +93,6 @@ export default function Gallery() {
         ))}
       </div>
 
-      {/* Lightbox / карусель */}
       {selected !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
@@ -110,7 +135,6 @@ export default function Gallery() {
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
-          {/* Счётчик */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-sm text-white backdrop-blur">
             {selected + 1} / {PHOTOS.length}
           </div>

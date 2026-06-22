@@ -79,7 +79,7 @@ export default async function SolutionPage({ params }: PageProps) {
             </ul>
           </div>
           <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Что должно обещать GastroPrime</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Что должно обещать Gastroprime</h2>
             <ul className="mt-6 grid gap-4 text-sm leading-7 text-slate-700">
               {solution.outcomes.map((item) => (
                 <li key={item}>• {item}</li>

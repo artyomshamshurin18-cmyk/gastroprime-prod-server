@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { LeadForm } from "@/components/lead-form";
 
 export const metadata: Metadata = {
-  title: "Заказать корпоративное питание | GastroPrime",
-  description: "Заявка на бесплатную дегустацию, расчёт меню и коммерческое предложение. GastroPrime — корпоративное питание в Москве и МО.",
+  title: "Заказать корпоративное питание | Gastroprime",
+  description: "Заявка на бесплатную дегустацию, расчёт меню и коммерческое предложение. Gastroprime — корпоративное питание в Москве и МО.",
 };
 
 const perks = [
@@ -26,7 +26,7 @@ export default function RequestPage() {
         </div>
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 sm:py-32">
           <div className="mb-6 inline-block rounded-full bg-amber-500/20 px-4 py-1.5 text-xs font-semibold text-amber-300 tracking-widest uppercase">
-            GastroPrime
+            Gastroprime
           </div>
           <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">
             Накормим команду вкусно

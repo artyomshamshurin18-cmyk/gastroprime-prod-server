@@ -48,7 +48,7 @@ export default async function CasePage({ params }: PageProps) {
 
       <section className="mt-10 grid gap-6 lg:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <SectionHeading eyebrow="Решение" title="Что сделал GastroPrime" />
+          <SectionHeading eyebrow="Решение" title="Что сделал Gastroprime" />
           <ul className="mt-6 grid gap-4 text-sm leading-7 text-slate-600">
             {currentCase.solution.map((item) => (
               <li key={item}>• {item}</li>

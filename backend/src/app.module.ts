@@ -15,6 +15,7 @@ import { TelegramModule } from "./telegram/telegram.module";
 import { LogisticsModule } from "./logistics/logistics.module";
 import { CrmModule } from "./crm/crm.module";
 import { ExolveModule } from "./exolve/exolve.module";
+import { ContentModule } from "./content/content.module";
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ExolveModule } from "./exolve/exolve.module";
     LogisticsModule,
     CrmModule,
     ExolveModule,
+    ContentModule,
   ],
 })
 export class AppModule {}

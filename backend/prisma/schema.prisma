@@ -772,3 +772,44 @@ model CrmProjectAttachment {
 
   message CrmProjectMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
 }
+
+// ===== Content models (for marketing site) =====
+enum ContentType {
+  PAGE_TEXT
+  GALLERY
+  REVIEW
+  CASE
+  FAQ
+  SOLUTION
+}
+
+model ContentBlock {
+  id          Int         @id @default(autoincrement())
+  type        ContentType
+  pageSlug    String?     // production, office, events, about, etc.
+  key         String      // hero_title, hero_desc, benefits, etc.
+  title       String?     // Заголовок блока
+  subtitle    String?     // Подзаголовок
+  body        String?     // HTML или JSON с контентом
+  imageUrl    String?     // URL картинки
+  imageAlt    String?     // Alt текст
+  sortOrder   Int         @default(0)
+  visible     Boolean     @default(true)
+  createdAt   DateTime    @default(now()) @db.Timestamptz()
+  updatedAt   DateTime    @updatedAt @db.Timestamptz()
+
+  @@map("content_blocks")
+}
+
+model ContentPhoto {
+  id          Int         @id @default(autoincrement())
+  galleryKey  String      // events_gallery, cases_gallery, etc.
+  filename    String      // original filename
+  filepath    String      // server path
+  title       String?
+  sortOrder   Int         @default(0)
+  visible     Boolean     @default(true)
+  createdAt   DateTime    @default(now()) @db.Timestamptz()
+
+  @@map("content_photos")
+}

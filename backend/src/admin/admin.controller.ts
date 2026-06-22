@@ -371,4 +371,11 @@ export class AdminController {
   }
 
 
+
+  @Post('content/sync')
+  async syncSiteContent() {
+    return this.adminService.syncSiteContent();
+  }
+
+
 }

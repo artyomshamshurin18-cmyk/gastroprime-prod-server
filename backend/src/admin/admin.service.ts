@@ -3171,4 +3171,24 @@ export class AdminService {
     return { success: true, totalAmount };
   }
 
+
+  async syncSiteContent() {
+    try {
+      const { exec } = require('child_process');
+      return new Promise((resolve) => {
+        exec('cd /root/gastroprime/site && npm run build 2>&1', { timeout: 60000 }, (error, stdout) => {
+          if (error) {
+            console.error('Site sync error:', error.message);
+            resolve({ success: false, message: error.message });
+          } else {
+            console.log('Site sync stdout:', stdout.slice(0, 500));
+            resolve({ success: true, message: 'Сайт перестроен' });
+          }
+        });
+      });
+    } catch (e) {
+      console.error('Site sync error:', e);
+      return { success: false, message: e.message };
+    }
+  }
 }

@@ -3,7 +3,7 @@ import { company } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Оферта",
-  description: "Черновик юридической страницы оферты для нового сайта GastroPrime.",
+  description: "Черновик юридической страницы оферты для нового сайта Gastroprime.",
 };
 
 export default function OfferPage() {

@@ -12,12 +12,12 @@ const faqItems = [
 ];
 
 export const metadata: Metadata = {
-  title: "Корпоративное питание для офисов | GastroPrime",
+  title: "Корпоративное питание для офисов | Gastroprime",
   description: "Обеды для офисов: горячая доставка, понятный бюджет, персональный менеджер и запуск корпоративного питания без лишней рутины.",
   openGraph: {
     title: "Корпоративное питание для офисов",
     description: "Обеды для офисов: горячая доставка, понятный бюджет, персональный менеджер и запуск корпоративного питания без лишней рутины.",
-    siteName: "GastroPrime",
+    siteName: "Gastroprime",
     locale: "ru_RU",
     type: "website",
   },
@@ -162,7 +162,7 @@ export default function OfficePage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Почему мы</div>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему офисы выбирают GastroPrime</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему офисы выбирают Gastroprime</h2>
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[

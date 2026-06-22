@@ -8,12 +8,17 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  font-family: Manrope, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 ::selection {
   background: rgba(245, 158, 11, 0.2);
   color: #000;
 }
 
-/* Hero bg gradient */
 .hero-gradient {
   background: linear-gradient(
     135deg,
@@ -23,70 +28,18 @@ html {
   );
 }
 
-/* Mobile optimisations */
 @media (max-width: 640px) {
-  .text-4xl {
-    font-size: 2rem !important;
-    line-height: 1.15 !important;
-  }
-
-  .text-5xl {
-    font-size: 2.25rem !important;
-    line-height: 1.1 !important;
-  }
-
-  .text-3xl {
-    font-size: 1.75rem !important;
-  }
-
-  .max-w-2xl {
-    max-width: 100% !important;
-  }
-
-  .leading-8 {
-    line-height: 1.6 !important;
-  }
-
-  /* Hero stats cards */
-  [class*="rounded-2xl"][class*="border-slate-800"] [class*="grid-cols-2"] {
-    gap: 0.5rem;
-  }
-
-  /* Make cards stack better on small screens */
-  [class*="grid-cols-2"][class*="gap-4"] > * {
-    padding: 0.75rem !important;
-  }
-
-  [class*="grid-cols-2"][class*="gap-4"] [class*="text-3xl"] {
-    font-size: 1.5rem !important;
-  }
-
-  /* Reduce vertical padding on mobile */
-  section[class*="py-20"],
-  section[class*="py-28"] {
-    padding-top: 3rem !important;
-    padding-bottom: 3rem !important;
-  }
-
-  /* Make flex-wrap CTA buttons full-width */
-  [class*="flex-wrap"][class*="gap-4"] > a {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Reduce card padding */
-  [class*="p-6"] {
-    padding: 1rem !important;
-  }
-
-  /* Make photo grid single column on small phones */
-  [class*="grid-cols-2"][class*="gap-3"] {
-    gap: 0.5rem;
-  }
-
-  /* Fix floating CTA position */
-  [class*="fixed"][class*="bottom-6"][class*="right-6"] {
-    bottom: 1rem !important;
-    right: 1rem !important;
-  }
+  .text-4xl { font-size: 2rem !important; line-height: 1.15 !important; }
+  .text-5xl { font-size: 2.25rem !important; line-height: 1.1 !important; }
+  .text-3xl { font-size: 1.75rem !important; }
+  .max-w-2xl { max-width: 100% !important; }
+  .leading-8 { line-height: 1.6 !important; }
+  [class*=rounded-2xl][class*=border-slate-800] [class*=grid-cols-2] { gap: 0.5rem; }
+  [class*=grid-cols-2][class*=gap-4] > * { padding: 0.75rem !important; }
+  [class*=grid-cols-2][class*=gap-4] [class*=text-3xl] { font-size: 1.5rem !important; }
+  section[class*=py-20], section[class*=py-28] { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+  [class*=flex-wrap][class*=gap-4] > a { text-align: center; width: 100%; }
+  [class*=p-6] { padding: 1rem !important; }
+  [class*=grid-cols-2][class*=gap-3] { gap: 0.5rem; }
+  [class*=fixed][class*=bottom-6][class*=right-6] { bottom: 1rem !important; right: 1rem !important; }
 }

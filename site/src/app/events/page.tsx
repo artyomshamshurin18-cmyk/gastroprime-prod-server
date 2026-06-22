@@ -5,12 +5,12 @@ import { FadeIn, PulseButton } from "@/components/animations";
 import Gallery from "@/components/gallery";
 
 export const metadata: Metadata = {
-  title: "Организация мероприятий под ключ | GastroPrime",
+  title: "Организация мероприятий под ключ | Gastroprime",
   description: "Кейтеринг на мероприятия: фуршеты, банкеты, корпоративы, выездное обслуживание под ключ.",
   openGraph: {
     title: "Организация мероприятий под ключ",
     description: "Кейтеринг на мероприятия: фуршеты, банкеты, корпоративы, выездное обслуживание под ключ.",
-    siteName: "GastroPrime",
+    siteName: "Gastroprime",
     locale: "ru_RU",
     type: "website",
   },
@@ -132,7 +132,7 @@ export default function EventsPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Почему мы</div>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему выбирают GastroPrime</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему выбирают Gastroprime</h2>
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[
@@ -196,7 +196,7 @@ export default function EventsPage() {
                   {"★★★★★"}
                 </div>
                 <p className="text-sm leading-7 text-slate-600 italic">
-                  "Организовали банкет на 200 человек в нашем офисе. GastroPrime привезли всё: от посуды до десертов. Очень довольны качеством и сервисом."
+                  "Организовали банкет на 200 человек в нашем офисе. Gastroprime привезли всё: от посуды до десертов. Очень довольны качеством и сервисом."
                 </p>
                 <div className="mt-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700">МК</div>
@@ -212,7 +212,7 @@ export default function EventsPage() {
                   {"★★★★★"}
                 </div>
                 <p className="text-sm leading-7 text-slate-600 italic">
-                  "BBQ на природе для команды из 50 человек. GastroPrime привезли мангалы, мясо, овощи, напитки. Всё на высшем уровне, спасибо!"
+                  "BBQ на природе для команды из 50 человек. Gastroprime привезли мангалы, мясо, овощи, напитки. Всё на высшем уровне, спасибо!"
                 </p>
                 <div className="mt-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700">ДС</div>

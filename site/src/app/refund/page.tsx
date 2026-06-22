@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Возврат",
-  description: "Черновик страницы возврата для нового сайта GastroPrime.",
+  description: "Черновик страницы возврата для нового сайта Gastroprime.",
 };
 
 export default function RefundPage() {

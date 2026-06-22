@@ -11,12 +11,12 @@ const faqItems = [
 ];
 
 export const metadata: Metadata = {
-  title: "Питание для складов и логистических центров | GastroPrime",
+  title: "Питание для складов и логистических центров | Gastroprime",
   description: "Организация горячего питания для складских комплексов: доставка обедов, термосы, полевые кухни для складов и распределительных центров.",
   openGraph: {
     title: "Питание для складов и логистических центров",
     description: "Организация горячего питания для складских комплексов: доставка обедов, термосы, полевые кухни для складов и распределительных центров.",
-    siteName: "GastroPrime",
+    siteName: "Gastroprime",
     locale: "ru_RU",
     type: "website",
   },
@@ -147,7 +147,7 @@ export default function WarehousesPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Почему мы</div>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему склады выбирают GastroPrime</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Почему склады выбирают Gastroprime</h2>
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[

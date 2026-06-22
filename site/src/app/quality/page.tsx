@@ -11,12 +11,12 @@ const faqItems = [
 ];
 
 export const metadata: Metadata = {
-  title: "Система контроля качества | GastroPrime",
+  title: "Система контроля качества | Gastroprime",
   description: "Контроль качества питания на всех этапах: от закупки до доставки. Собственная лаборатория, сертификация, стандарты ХАССП.",
   openGraph: {
     title: "Система контроля качества",
     description: "Контроль качества питания на всех этапах: от закупки до доставки. Собственная лаборатория, сертификация, стандарты ХАССП.",
-    siteName: "GastroPrime",
+    siteName: "Gastroprime",
     locale: "ru_RU",
     type: "website",
   },

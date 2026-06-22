@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BASE } from "@/lib/base";
 import { FadeIn, AnimatedNumber, PulseButton } from "@/components/animations";
 import { PhotoGrid } from "@/components/photo-grid";
 import type { Metadata } from "next";
