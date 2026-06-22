@@ -76,6 +76,7 @@ export class CrmTasksService {
       }
     }
 
+    console.log('CREATE DEBUG:', JSON.stringify({ assigneeId: data.assigneeId, userId: user.userId, title: data.title }));
     const assigneeId = data.assigneeId || user.userId;
 
     const task = await this.prisma.crmTask.create({

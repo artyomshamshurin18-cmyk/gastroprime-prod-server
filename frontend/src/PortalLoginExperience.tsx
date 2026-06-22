@@ -78,9 +78,12 @@ export default function PortalLoginExperience({
   const [companyName, setCompanyName] = useState('')
   const [firstName, setFirstName] = useState('')
   const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [peopleCount, setPeopleCount] = useState('')
+  const [deliveryTime, setDeliveryTime] = useState('')
 
   const handleRegister = () => {
-    onRegister({ companyName, firstName, phone })
+    onRegister({ companyName, firstName, phone, address, peopleCount, deliveryTime })
   }
 
   return (
@@ -148,9 +151,21 @@ export default function PortalLoginExperience({
                     <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Ваше имя</label>
                     <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                   </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Телефон *</label>
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Адрес доставки *</label>
+                    <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="г. Москва, ул. ..." required />
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Сколько человек питается</label>
+                    <input type="text" value={peopleCount} onChange={(e) => setPeopleCount(e.target.value)} placeholder="~25-30 человек" />
+                  </div>
                   <div style={{ marginBottom: 18 }}>
-                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Телефон</label>
-                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Время доставки</label>
+                    <input type="text" value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} placeholder="11:00–12:00" />
                   </div>
                   <button className="gp-btn gp-btn--primary gp-btn--full" onClick={handleRegister} disabled={loading}>
                     {loading ? 'Регистрация...' : 'Зарегистрировать компанию'}

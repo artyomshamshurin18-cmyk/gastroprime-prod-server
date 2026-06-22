@@ -3,7 +3,7 @@ import { TelegramService } from "../../telegram/telegram.service";
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 
-const STAGE_ORDER = ['LEAD', 'MODERATION', 'TASTING_SCHEDULED', 'TASTING_DONE', 'NEGOTIATION', 'QUOTE_SENT', 'CONTRACT', 'DEFERRED', 'CONTRACT_SIGNED'];
+const STAGE_ORDER = ['LEAD', 'MODERATION', 'TASTING_SCHEDULED', 'TASTING_DONE', 'NEGOTIATION', 'QUOTE_SENT', 'CONTRACT', 'DEFERRED', 'LOST', 'CONTRACT_SIGNED'];
 
 @Injectable()
 export class CrmDealsService {
@@ -64,7 +64,7 @@ export class CrmDealsService {
           select: {
             id: true, name: true, contactPerson: true, address: true,
             workEmail: true, peopleCount: true, status: true, balance: true,
-            creditBalance: true, notes: true,
+            phone: true, contactPhone: true, creditBalance: true, notes: true,
           },
         },
         manager: { select: { id: true, email: true, firstName: true, lastName: true } },
@@ -113,7 +113,7 @@ export class CrmDealsService {
           address: data.deliveryAddress || '',
           contactPerson: data.contactPerson || null,
           workEmail: data.email || null,
-          peopleCount: data.employeesCount || null,
+          peopleCount: String(data.employeesCount) || null,
           notes: companyNotes || null,
           status: 'ACTIVE',
           accountNumber: generateAccountNumber(),
@@ -340,8 +340,11 @@ export class CrmDealsService {
   }
 
   async remove(id: string) {
+    // If already deleted, just return success (race condition / stale UI)
     const deal = await this.prisma.crmDeal.findUnique({ where: { id } });
-    if (!deal) throw new NotFoundException('Сделка не найдена');
+    if (!deal) return { success: true };
+    // Delete log entries first to avoid FK constraint violation
+    await this.prisma.crmDealLog.deleteMany({ where: { dealId: id } });
     await this.prisma.crmDeal.delete({ where: { id } });
     return { success: true };
   }

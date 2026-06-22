@@ -173,6 +173,7 @@ const makeDraft = (company: ManagerBoardCompany): CompanyDraft => ({
 
 export default function ManagerBoard({ token, onImpersonate }: { token: string, onImpersonate: (token: string, user: any) => void }) {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState("")
   const [companies, setCompanies] = useState<ManagerBoardCompany[]>([])
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [loading, setLoading] = useState(false)
@@ -545,6 +546,16 @@ export default function ManagerBoard({ token, onImpersonate }: { token: string, 
         <button onClick={() => loadBoard(search)} disabled={loading} style={{ background: '#0d6efd', color: '#fff', border: 'none', borderRadius: 12, padding: '10px 16px' }}>
           {loading ? 'Ищу...' : 'Найти'}
         </button>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 12, padding: "10px 16px", fontSize: 14 }}>
+          <option value="">Все статусы</option>
+          <option value="ACTIVE">В работе</option>
+          <option value="ONBOARDING">Подключение</option>
+          <option value="CRM_LEAD">Лид</option>
+          <option value="ON_HOLD">На стопе</option>
+          <option value="TERMINATED">Расторгнуто</option>
+          <option value="ARCHIVED">Архив</option>
+          <option value="BLOCKED">Заблокировано</option>
+        </select>
         <button onClick={() => { setSearch(''); loadBoard('') }} disabled={loading} style={{ background: '#fff7f1', color: '#b53b1f', border: '1px solid #f1d5c3', borderRadius: 12, padding: '10px 16px' }}>
           Сбросить
         </button>
@@ -559,7 +570,7 @@ export default function ManagerBoard({ token, onImpersonate }: { token: string, 
         <div style={{ color: '#666' }}>Клиенты не найдены</div>
       ) : (
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-          {companies.map((company) => {
+          {companies.filter((company) => !statusFilter || company.status === statusFilter).map((company) => {
             const draft = drafts[company.id] || makeDraft(company)
             const isEditing = editingId === company.id
             const summary = chatSummary[company.id]

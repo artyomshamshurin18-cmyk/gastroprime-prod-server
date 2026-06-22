@@ -152,7 +152,10 @@ export default function CrmLeads({ token, userRole }: { token: string; userRole:
 
   const handleUpdateCompanyField = async (dealId: string, field: string, value: any) => {
     try {
-      await axios.patch(`${API_URL}/crm/deals/${dealId}/company`, { [field]: value }, { headers });
+      const res = await axios.patch(`${API_URL}/crm/deals/${dealId}/company`, { [field]: value }, { headers });
+      if (detailDeal?.id === dealId) {
+        setDetailDeal({ ...detailDeal, company: { ...(detailDeal as any).company, [field]: value } } as any);
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -166,7 +169,23 @@ export default function CrmLeads({ token, userRole }: { token: string; userRole:
     } catch (e) { console.error(e); }
   };
 
-  const getSourceLabel = (s: string) => DEAL_SOURCES.find(ds => ds.value === s)?.label || s;
+  const handleSaveAll = async () => {
+    if (!detailDeal) return;
+    const c = detailDeal.company || {};
+    const q: any = {
+      contactPerson: c.contactPerson || "",
+      phone: c.phone || "",
+      workEmail: c.workEmail || "",
+      peopleCount: c.peopleCount || 0,
+      address: c.address || "",
+    };
+    try {
+      await axios.patch(`${API_URL}/crm/deals/${detailDeal.id}/company`, q, { headers });
+      loadLeads();
+    } catch (e) { console.error(e); }
+  };
+
+const getSourceLabel = (s: string) => DEAL_SOURCES.find(ds => ds.value === s)?.label || s;
   const getStageLabel = (s: string) => {
     const st = CRM_STAGES.find(cs => cs.value === s);
     return st ? st.label : s;
@@ -395,6 +414,10 @@ export default function CrmLeads({ token, userRole }: { token: string; userRole:
                 <button onClick={() => { if (confirm(`Удалить лид "${detailDeal.company?.name}"?`)) { handleDelete(detailDeal.id, detailDeal.company?.name); } }}
                   style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12 }}>
                   🗑️ Удалить
+                </button>
+                <button onClick={handleSaveAll}
+                  style={{ background: '#28a745', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                  💾 Сохранить
                 </button>
                 <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#999' }}>×</button>
               </div>

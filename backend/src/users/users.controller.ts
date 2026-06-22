@@ -172,6 +172,12 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('company/reconciliation/pdf')
+  async exportCompanyReconciliationPdf(@Request() req, @Res() res) {
+    return this.usersService.exportCompanyReconciliationPdf(req.user.userId, req.query.start as string, req.query.end as string, res);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get('company/invoices')
   async getCompanyInvoices(@Request() req) {
     return this.usersService.getCompanyInvoices(req.user.userId);

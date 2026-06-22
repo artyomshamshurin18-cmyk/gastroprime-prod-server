@@ -203,14 +203,30 @@ export class WeeklyMenuService {
       });
     });
 
-    // Удаляем старое меню на этот период
-    await this.prisma.weeklyMenu.deleteMany({
-      where: {
-        userId,
-        startDate,
-        endDate,
-      }
+    // Удаляем ТОЛЬКО даты, которые переданы в selections (а не весь период)
+    const selectionDates = normalizedSelections.map(s => s.date);
+    // Сначала удаляем DaySelection для этих дат
+    const existingWMs = await this.prisma.weeklyMenu.findMany({
+      where: { userId, startDate, endDate },
+      select: { id: true },
     });
+    if (existingWMs.length > 0) {
+      await this.prisma.daySelection.deleteMany({
+        where: {
+          weeklyMenuId: { in: existingWMs.map(w => w.id) },
+          date: { in: selectionDates },
+        }
+      });
+      // Удаляем пустые weeklyMenu (без selections)
+      await this.prisma.weeklyMenu.deleteMany({
+        where: {
+          userId,
+          startDate,
+          endDate,
+          selections: { none: {} }
+        }
+      });
+    }
 
     // Создаём новое
     const weeklyMenu = await this.prisma.weeklyMenu.create({
@@ -227,10 +243,16 @@ export class WeeklyMenuService {
               needBread: sel.needBread,
               notes: sel.notes || '',
               items: {
-                create: sel.items.map(item => ({
-                  dishId: item.dishId,
-                  quantity: item.quantity > 0 ? item.quantity : 1,
-                }))
+                create: sel.items.map(item => {
+                  const dateKey = this.toDateKey(sel.date)
+                  const menuForDate = dailyMenuByDate.get(dateKey)
+                  const menuItem = menuForDate?.items.find(mi => mi.dishId === item.dishId)
+                  return {
+                    dishId: item.dishId,
+                    quantity: item.quantity > 0 ? item.quantity : 1,
+                    garnishDishId: menuItem?.garnishDishId || null,
+                  }
+                })
               }
             };
           })
@@ -285,7 +307,7 @@ export class WeeklyMenuService {
 
     const dailyMenu = await this.prisma.dailyMenu.findUnique({
       where: { date: new Date(date) },
-      include: { items: true },
+      include: { items: { select: { id: true, dishId: true, garnishDishId: true, maxQuantity: true, sortOrder: true } } },
     });
 
     const menuItem = dailyMenu?.items.find(item => item.dishId === data.dishId);
@@ -312,7 +334,8 @@ export class WeeklyMenuService {
         data: {
           daySelectionId: daySelection.id,
           dishId: data.dishId,
-          quantity: data.quantity
+          quantity: data.quantity,
+          garnishDishId: menuItem.garnishDishId || null
         }
       });
     }

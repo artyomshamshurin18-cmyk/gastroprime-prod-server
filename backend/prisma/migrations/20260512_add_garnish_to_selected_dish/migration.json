@@ -1,0 +1,10 @@
+{
+  "version": "5.22.0",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "field": "garnishDishId",
+      "model": "SelectedDish"
+    }
+  ]
+}

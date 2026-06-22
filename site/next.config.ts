@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  assetPrefix: "",
+  trailingSlash: true,
+
+  async rewrites() {
+    return [];
+  },
+
   async redirects() {
     return [
       { source: "/cosntructions", destination: "/construction", permanent: true },

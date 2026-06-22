@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { join, extname } from 'path';
 import { createHash, randomUUID } from 'crypto';
 import { getCompanyCategoryPriceMap, getResolvedCompanyDishPrice } from '../common/company-pricing';
+import { TelegramService } from '../telegram/telegram.service';
 
 const normalizeText = (value: unknown) => String(value ?? '').trim();
 const normalizeKey = (value: string) => normalizeText(value).toLowerCase().replace(/[\s_\-]+/g, '');
@@ -72,7 +73,7 @@ const safeUserSelect = {
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private telegram: TelegramService) {}
 
   private parseDate(value?: string) {
     const date = value ? new Date(value) : new Date();
@@ -733,7 +734,7 @@ export class UsersService {
         date: { gte: startDate, lte: endDate },
         weeklyMenu: {
           user: { companyId: context.companyId },
-          status: { in: ['DRAFT', 'CONFIRMED', 'PAID', 'DEFERRED'] },
+          status: { in: ['DRAFT', 'CONFIRMED', 'PAID', 'DEFERRED', 'COMPLETED'] },
         },
       },
       orderBy: [{ date: 'asc' }],
@@ -1231,7 +1232,8 @@ export class UsersService {
     };
 
     const ensureWeeklyMenuForDate = async (userId: string, items: { dishId: string; quantity: number }[]) => {
-      const existingWeeklyMenu = await this.prisma.weeklyMenu.findFirst({
+      console.log("[DEB] ensureWM userId=" + userId + " date=" + targetDate.toISOString().slice(0,10));
+    const existingWeeklyMenu = await this.prisma.weeklyMenu.findFirst({
         where: {
           userId,
           startDate: { lte: targetDate },
@@ -1395,6 +1397,9 @@ export class UsersService {
   }
 
   async createCompanyRequest(coordinatorUserId: string, data: { date?: string }) {
+    console.log("[DEB2] createCompanyRequest userId=" + coordinatorUserId + " date=" + (data.date || "?"));
+    const allB4 = await this.prisma.daySelection.count();
+    console.log("[DEB2] total DS before: " + allB4);
     const context = await this.getCoordinatorContext(coordinatorUserId);
     this.ensureCompanyStatusAllowed(context.company?.status, ['ACTIVE'], 'Создание заявки доступно только активной компании');
     const targetDate = this.parseDate(data.date);
@@ -1466,6 +1471,25 @@ export class UsersService {
       }
     })
 
+    // Уведомление в Telegram о новой заявке
+    try {
+      const totalAmount = employees.reduce((sum, e) => sum + e.totalAmount, 0);
+      const companyName = context.company?.name || context.companyId;
+      const msg = [
+        '<b>🆕 Новая заявка от компании!</b>',
+        '',
+        '<b>Компания:</b> ' + companyName,
+        '<b>Дата:</b> ' + targetDate.toISOString().slice(0, 10),
+        '<b>Сотрудников:</b> ' + employees.length,
+        '<b>Порций:</b> ' + employees.reduce((s, e) => s + e.totalPortions, 0),
+        '<b>Сумма:</b> ' + totalAmount.toLocaleString('ru') + ' ₽',
+        '<b>ID заявок:</b> ' + employees.map(e => e.weeklyMenuId.slice(0, 8)).join(', '),
+      ].join('\n');
+      this.telegram.sendMessage(msg).catch(() => {});
+    } catch (e) {
+      console.error('Telegram notify request failed:', (e as Error).message);
+    }
+
     return {
       date: targetDate.toISOString().slice(0, 10),
       created: true,
@@ -1516,6 +1540,7 @@ export class UsersService {
       }
     }
 
+    console.log("[DEB] setSelection emp=" + employeeId + " date=" + targetDate.toISOString().slice(0,10) + " items=" + JSON.stringify(items.map(i => i.dishId.slice(0,6) + "x" + i.quantity)));
     const existingSelection = await this.prisma.daySelection.findFirst({
       where: {
         date: targetDate,
@@ -1567,7 +1592,45 @@ export class UsersService {
       });
     }
 
-    return this.prisma.weeklyMenu.create({
+    // Не нашли точный WM — ищем ближайший по дате и расширяем его
+    const nearestWM = await this.prisma.weeklyMenu.findFirst({
+      where: {
+        userId: employeeId,
+        OR: [
+          { startDate: { lte: targetDate }, endDate: { gte: targetDate } },
+          { startDate: { lte: targetDate } },
+          { endDate: { gte: targetDate } },
+        ],
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (nearestWM) {
+      // Расширяем границы
+      const newStart = nearestWM.startDate < targetDate ? nearestWM.startDate : targetDate;
+      const newEnd = nearestWM.endDate > targetDate ? nearestWM.endDate : targetDate;
+      await this.prisma.weeklyMenu.update({
+        where: { id: nearestWM.id },
+        data: { startDate: newStart, endDate: newEnd },
+      });
+      return this.prisma.daySelection.create({
+        data: {
+          weeklyMenuId: nearestWM.id,
+          date: targetDate,
+          utensils: 1,
+          needBread: true,
+          notes: 'Выбрано координатором компании',
+          items: {
+            create: items.map(item => ({
+              dishId: item.dishId,
+              quantity: item.quantity,
+            })),
+          },
+        },
+      });
+    }
+
+      return this.prisma.weeklyMenu.create({
       data: {
         userId: employeeId,
         startDate: targetDate,
@@ -2067,7 +2130,21 @@ export class UsersService {
     };
   }
 
-  async getCompanyReconciliation(userId: string, start: string, end: string) {
+  
+  async exportCompanyReconciliationPdf(userId: string, start: string, end: string, res: any) {
+    const data = await this.getCompanyReconciliation(userId, start, end);
+    const { renderReconciliationPdf } = require('../billing/reconciliation-pdf');
+    const buffer = await renderReconciliationPdf(data);
+    const filename = `sverka_${start}_${end}.pdf`;
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
+async getCompanyReconciliation(userId: string, start: string, end: string) {
     const currentUser = await this.getCompanyUserContext(userId);
     this.ensureCompanyStatusAllowed(currentUser.company?.status, ['ACTIVE', 'ON_HOLD'], 'Сверка доступна только активной или остановленной компании');
 
@@ -2124,6 +2201,7 @@ export class UsersService {
           usersSet: new Set<string>(),
           portions: 0,
           subtotal: 0,
+          dishes: new Map<string, { dishName: string; categoryName: string; quantity: number; total: number }>(),
         });
       }
       const row = rowsMap.get(key);
@@ -2133,6 +2211,18 @@ export class UsersService {
         const resolvedPrice = getResolvedCompanyDishPrice(item.dish, companyPriceMap)
         row.portions += item.quantity;
         row.subtotal += (item.quantity || 0) * resolvedPrice;
+        const dishKey = item.dish.id;
+        if (!row.dishes.has(dishKey)) {
+          row.dishes.set(dishKey, {
+            dishName: item.dish.name,
+
+            quantity: 0,
+            total: 0,
+          });
+        }
+        const d = row.dishes.get(dishKey);
+        d.quantity += item.quantity;
+        d.total += (item.quantity || 0) * resolvedPrice;
       });
     });
 
@@ -2145,6 +2235,7 @@ export class UsersService {
         usersCount: row.usersSet.size,
         portions: row.portions,
         subtotal: row.subtotal,
+        dishes: Array.from(row.dishes.values()).sort((a: any, b: any) => a.dishName.localeCompare(b.dishName)),
         deliveryStatus: closing?.status || '',
         deviationAmount,
         deviationComment: closing?.deviationComment || '',

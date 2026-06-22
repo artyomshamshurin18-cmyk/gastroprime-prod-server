@@ -1,38 +1,86 @@
 import Link from "next/link";
-import { company, navigation } from "@/content/site";
+import { company } from "@/content/site";
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.3fr,1fr,1fr] lg:px-8">
-        <div className="space-y-3">
-          <div className="text-lg font-semibold text-slate-950">{company.name}</div>
-          <p className="max-w-md text-sm text-slate-600">
-            Новый маркетинговый сайт проектируется как управляемая кодовая база: без Tilda, с чистыми URL, SEO-контролем и контентом, который можно править через помощника.
-          </p>
-        </div>
-        <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Разделы</h3>
-          <div className="grid gap-2 text-sm text-slate-600">
-            {navigation.map((item) => (
-              <Link key={item.href} href={item.href} className="transition hover:text-slate-950">
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/offer" className="transition hover:text-slate-950">Оферта</Link>
-            <Link href="/refund" className="transition hover:text-slate-950">Возврат</Link>
+    <>
+      <section className="bg-black">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 p-8 sm:p-16">
+            <div className="pointer-events-none absolute inset-0 opacity-10">
+              <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-amber-300 blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-amber-200 blur-3xl" />
+            </div>
+            <div className="relative">
+              <div className="mx-auto max-w-2xl text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Начните кормить сотрудников вкусно и выгодно</h2>
+                <p className="mt-4 text-lg text-amber-100">Бесплатная дегустация, индивидуальное меню, расчёт за 1 час.</p>
+                <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                  <Link href="/request" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-amber-800 shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95">Бесплатная дегустация →</Link>
+                  <a href={`tel:${company.phone.replace(/[^+\d]/g, "")}`} className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-8 py-4 text-base font-medium text-white transition hover:border-white/60 hover:bg-white/10">{company.phone}</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Контакты</h3>
-          <div className="grid gap-2 text-sm text-slate-600">
-            <a href={`tel:${company.phone.replace(/[^+\d]/g, "")}`} className="transition hover:text-slate-950">{company.phone}</a>
-            <a href={`mailto:${company.email}`} className="transition hover:text-slate-950">{company.email}</a>
-            <p>{company.city}</p>
-            <p>{company.address}</p>
-          </div>
-        </div>
+      </section>
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <Link href="/request" className="flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-white shadow-2xl shadow-amber-500/30 transition-all duration-300 hover:bg-amber-400 hover:scale-105 hover:shadow-amber-500/50 active:scale-95">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-bold">KP</span>
+          <span className="hidden sm:inline">Заказать питание</span>
+          <span className="sm:hidden">Заказ</span>
+        </Link>
       </div>
-    </footer>
+      <footer className="border-t border-slate-800 bg-black">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[1.5fr,1fr,1fr,1.2fr]">
+            <div className="space-y-4">
+              <img src="/gastroprime-logo-header.png" alt="GastroPrime" className="h-24 w-auto sm:h-32" />
+              <p className="max-w-xs text-sm leading-6 text-slate-400">Корпоративное питание полного цикла: собственное производство 600 m2, своя логистика с рефрижераторами, гибкие решения для любых задач.</p>
+            </div>
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Разделы</h3>
+              <div className="grid gap-3 text-sm text-slate-400">
+                <Link href="/" className="transition hover:text-white">Главная</Link>
+                <Link href="/quality" className="transition hover:text-white">Качество</Link>
+                <Link href="/cases" className="transition hover:text-white">Кейсы</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Инфо</h3>
+              <div className="grid gap-3 text-sm text-slate-400">
+                <Link href="/offer" className="transition hover:text-white">Оферта</Link>
+                <Link href="/quality" className="transition hover:text-white">HACCP</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Контакты</h3>
+              <div className="space-y-3 text-sm text-slate-400">
+                <a href={`tel:${company.phone.replace(/[^+\d]/g, "")}`} className="block text-amber-400 hover:text-amber-300 transition">{company.phone}</a>
+                <a href={`mailto:${company.email}`} className="block text-amber-400 hover:text-amber-300 transition">{company.email}</a>
+                <div className="pt-2">
+                  <p className="text-xs text-slate-500 mb-2">Мы в соцсетях</p>
+                  <div className="flex flex-wrap gap-2">
+                    <a href={company.social.telegram} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:bg-amber-500/20 hover:text-amber-400" title="Telegram">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href={company.social.instagram} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:bg-amber-500/20 hover:text-amber-400" title="Instagram">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href={company.social.vk} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:bg-amber-500/20 hover:text-amber-400" title="VKontakte">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.24 16.18h-1.7c-.36 0-.48-.28-.48-.6 0-.48.02-1.72.02-1.72 0-.8-.48-1.04-.96-1.1-.78-.1-1.34.74-2.02 1.46-.48.5-.68.64-1 .32-.36-.32-.36-.96-.36-1.48 0-1.46.22-2.08-.44-2.24-.08-.02-.16-.04-.26-.04-.52 0-1.2.68-1.56 1.12-.48.58-.76 1.46-.86 2.14-.04.32-.14.38-.26.2-.18-.28-.26-.8-.26-1.18 0-.2-.04-.38.06-.6.08-.18.3-.3.42-.42.18-.18.24-.3.34-.44.1-.14.14-.38.1-.56-.08-.28-.44-.38-.78-.38h-1.38c-.58 0-.74.24-.82.42-.08.18-.08.54-.08.86 0 .26.02.56.1.86l.12.36c.1.28.22.56.36.84.02.04.04.08.04.12-.06.06-.12.14-.18.2-.28.42-.76 1.24-.88 1.6-.14.42-.28.84-.4 1.24 0 .02-.02.04-.04.06-.04.08-.08.14-.12.2-.08.12-.16.22-.24.3s-.18.14-.22.14c-.04 0-.12-.02-.18-.12-.04-.08-.06-.2-.06-.34 0-.1.01-.2.02-.3.04-.3.26-1.18-.04-1.68-.14-.24-.4-.36-.64-.4-.16-.02-.36-.04-.48-.04-.38 0-.78.08-1.08.26-.12.08-.2.16-.22.22 0 .02.04.06.12.12.24.18.36.44.44.72.02.06.04.12.06.18.1.34.14.7.14 1.08 0 .38-.02.78-.1 1.16-.04.2-.1.4-.2.6-.06.12-.12.2-.2.26-.04.04-.06.06-.08.06H6.9c-.28 0-.42-.24-.42-.66 0-1.18.98-4.88 1.5-5.84.18-.34.32-.58.46-.74.06-.06.08-.1.08-.12 0-.02-.02-.04-.04-.06l-.04-.04c-.52-.54-1.08-1.08-1.58-1.68-.56-.68-.96-1.4-1.1-2.08-.06-.28-.02-.5.1-.66.1-.14.28-.22.52-.22h1.7c.24 0 .4.08.48.22.06.1.08.24.08.44 0 .36.02.74.06 1.12.04.38.12.78.2 1.18.1.4.24.78.4 1.14.16.36.34.68.54.96.08.12.16.22.24.32.02.02.04.04.06.06.02.02.04.02.06.02s.04-.02.06-.06c.04-.06.08-.14.12-.24.08-.26.14-.52.18-.78.02-.12.02-.24.02-.36 0-.28-.02-.56-.04-.84 0-.14-.02-.28-.02-.42 0-.16 0-.3.02-.4.02-.14.06-.24.12-.3.08-.08.2-.14.36-.14.02 0 .04 0 .06.02h.02c-.16-.18-.26-.44-.28-.7-.02-.12-.02-.24-.02-.36 0-.28.04-.54.12-.76.08-.22.2-.4.36-.54.16-.14.36-.24.58-.3.24-.06.5-.1.78-.1h1.36c.4 0 .72.08.9.24.18.16.28.4.3.72.02.3.02.62 0 .96 0 .34-.02.7-.06 1.06-.02.16-.04.32-.06.48-.02.12-.04.22-.08.32-.02.06-.04.1-.06.12-.02.02-.02.04 0 .04l.04.04c.04 0 .08 0 .14-.02.06-.02.12-.06.18-.1.36-.32.74-.78 1.08-1.3.16-.26.3-.52.42-.78.08-.16.16-.32.22-.48.04-.1.08-.2.1-.28.02-.06.04-.1.06-.12.02-.02.04-.02.06-.02h.06-.02c.22 0 .44 0 .64.02h.44c.44 0 .78.08 1.04.24.18.12.28.28.34.48.04.14.06.28.06.44.02.16.02.34.02.52 0 .18 0 .38-.02.56 0 .18-.02.34-.04.5 0 .08-.02.16-.04.24 0 .04 0 .08-.02.1l-.02.06h.02c.04 0 .08.02.14.04.08.04.18.08.28.14.16.1.32.24.48.38.28.28.54.6.76.96.22.36.4.74.54 1.12.14.38.24.76.32 1.14.08.38.12.74.12 1.08 0 .18-.02.34-.06.48-.04.14-.1.26-.18.34-.08.08-.18.14-.3.16-.02 0-.04 0-.06.02h-.02z"/></svg>
+                    </a>
+                    <a href={company.social.whatsapp} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:bg-amber-500/20 hover:text-amber-400" title="WhatsApp">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-12 border-t border-slate-800 pt-8 text-center text-xs text-slate-600">© {new Date().getFullYear()} {company.legalName}. Все права защищены.</div>
+        </div>
+      </footer>
+    </>
   );
 }

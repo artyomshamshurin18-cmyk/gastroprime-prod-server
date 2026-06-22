@@ -5,7 +5,10 @@ import { API_URL, MEDIA_URL } from './api-config';
 
 const weeklyStatusLabels: Record<string, string> = {
   DRAFT: 'Черновик',
-  CONFIRMED: 'Подтверждено',
+  CONFIRMED: 'В заявке',
+  PAID: 'Оплачено',
+  DEFERRED: 'Отсрочка',
+  COMPLETED: 'Выполнено',
 }
 
 const attendanceLabels: Record<string, string> = {
@@ -669,11 +672,11 @@ export default function ClientCompanyDashboard({ token, onUserUpdate }: { token:
               <h3 style={{ marginTop: 0, marginBottom: 12 }}>Состав заявки на {date}</h3>
               <div style={{ display: 'grid', gap: 8 }}>
                 {data.employees.filter((employee: any) => employee.hasSelection).map((employee: any) => (
-                  <div key={`request-${employee.userId}`} style={{ background: employee.weeklyStatus === 'CONFIRMED' ? '#f7faff' : '#fff8e6', border: employee.weeklyStatus === 'CONFIRMED' ? '1px solid #d7e7ff' : '1px solid #ffe69c', borderRadius: 8, padding: 12 }}>
+                  <div key={`request-${employee.userId}`} style={{ background: employee.weeklyStatus === 'CONFIRMED' || employee.weeklyStatus === 'PAID' || employee.weeklyStatus === 'DEFERRED' ? '#f7faff' : '#fff8e6', border: employee.weeklyStatus === 'CONFIRMED' || employee.weeklyStatus === 'PAID' || employee.weeklyStatus === 'DEFERRED' ? '1px solid #d7e7ff' : '1px solid #ffe69c', borderRadius: 8, padding: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                       <strong>{employee.userName}</strong>
-                      <span style={{ fontSize: 13, color: employee.weeklyStatus === 'CONFIRMED' ? '#0d6efd' : '#fd7e14', fontWeight: 700 }}>
-                        {employee.weeklyStatus === 'CONFIRMED' ? 'В заявке' : 'Черновик'}
+                      <span style={{ fontSize: 13, color: employee.weeklyStatus === 'DRAFT' ? '#fd7e14' : employee.weeklyStatus === 'CONFIRMED' ? '#0d6efd' : employee.weeklyStatus === 'PAID' ? '#28a745' : employee.weeklyStatus === 'DEFERRED' ? '#fd7e14' : employee.weeklyStatus === 'COMPLETED' ? '#17a2b8' : '#fd7e14', fontWeight: 700 }}>
+                        {employee.weeklyStatus === 'DRAFT' ? 'Черновик' : employee.weeklyStatus === 'CONFIRMED' ? 'В заявке' : employee.weeklyStatus === 'PAID' ? 'Оплачено' : employee.weeklyStatus === 'DEFERRED' ? 'Отсрочка' : employee.weeklyStatus === 'COMPLETED' ? 'Выполнено' : 'Черновик'}
                       </span>
                     </div>
                     <div style={{ color: '#444', marginTop: 6 }}>{(employee.items || []).map((item: any) => `${item.dishName} × ${item.quantity}`).join(' • ')}</div>

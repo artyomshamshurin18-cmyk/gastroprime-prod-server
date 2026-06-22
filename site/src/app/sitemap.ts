@@ -1,25 +1,22 @@
 import type { MetadataRoute } from "next";
-import { cases } from "@/content/cases";
-import { siteUrl, solutions } from "@/content/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = [
-    "",
-    "/about",
-    "/contacts",
-    "/request",
-    "/offer",
-    "/refund",
-    "/quality",
-    "/cases",
-    ...solutions.map((solution) => `/${solution.slug}`),
-    ...cases.map((item) => `/cases/${item.slug}`),
+  const base = "https://gastroprime.ru";
+
+  const pages = [
+    { path: "", priority: 1.0, changefreq: "weekly" as const },
+    { path: "/production", priority: 0.9, changefreq: "monthly" as const },
+    { path: "/office", priority: 0.9, changefreq: "monthly" as const },
+    { path: "/construction", priority: 0.8, changefreq: "monthly" as const },
+    { path: "/warehouses", priority: 0.8, changefreq: "monthly" as const },
+    { path: "/quality", priority: 0.8, changefreq: "monthly" as const },
+    { path: "/events", priority: 0.7, changefreq: "monthly" as const },
   ];
 
-  return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
+  return pages.map(({ path, priority, changefreq }) => ({
+    url: `${base}${path}/`,
     lastModified: new Date(),
-    changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : 0.8,
+    changeFrequency: changefreq,
+    priority,
   }));
 }

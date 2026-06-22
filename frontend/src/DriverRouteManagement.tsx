@@ -14,6 +14,7 @@ interface RouteCompany {
   address: string
   contactPerson: string
   contactPhone: string
+  entryConditions: string
   deliveryTime: string
   dishes: RouteDish[]
   status: string
@@ -134,7 +135,7 @@ export default function DriverRouteManagement({ token }: { token: string }) {
     try {
       await axios.patch(
         `${API_URL}/driver/routes/${companyId}/notes`,
-        { notes: notesInput[companyId] || '' },
+        { driverNote: notesInput[companyId] || '', date: selectedDate },
         { headers: { Authorization: `Bearer ${token}` } }
       )
     } catch (err: any) {
@@ -183,6 +184,7 @@ export default function DriverRouteManagement({ token }: { token: string }) {
               {lp.contactPerson && <div style={{ color: '#666', fontSize: 12 }}>👤 {lp.contactPerson}</div>}
               {lp.contactPhone && <div style={{ color: '#666', fontSize: 12 }}>📞 {lp.contactPhone}</div>}
               {lp.note && <div style={{ background: '#fff3cd', color: '#856404', borderRadius: 4, padding: '4px 8px', marginTop: 6, fontSize: 12 }}>📝 {lp.note}</div>}
+              {(lp.timeWindowStart || lp.timeWindowEnd) && <div style={{ color: "#666", fontSize: 12, marginTop: 2 }}>{lp.timeWindowStart} — {lp.timeWindowEnd}</div>}
               <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                 <button onClick={async () => { try { await axios.patch(`${API_URL}/logistics/points/${lp.id}/status`, { status: 'done' }, { headers: { Authorization: `Bearer ${token}` } }); const lp2 = await axios.get(`${API_URL}/logistics/my-points/${selectedDate}`, { headers: { Authorization: `Bearer ${token}` } }); setLogPoints(Array.isArray(lp2.data) ? lp2.data : (lp2.data?.points || [])); } catch(e) {} }} style={{ background: lp.status === 'done' ? '#198754' : '#e9ecef', color: lp.status === 'done' ? 'white' : '#333', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✓ Сделано</button>
                 <button onClick={async () => { try { await axios.patch(`${API_URL}/logistics/points/${lp.id}/status`, { status: 'skipped' }, { headers: { Authorization: `Bearer ${token}` } }); const lp2 = await axios.get(`${API_URL}/logistics/my-points/${selectedDate}`, { headers: { Authorization: `Bearer ${token}` } }); setLogPoints(Array.isArray(lp2.data) ? lp2.data : (lp2.data?.points || [])); } catch(e) {} }} style={{ background: lp.status === 'skipped' ? '#dc3545' : '#e9ecef', color: lp.status === 'skipped' ? 'white' : '#333', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}>✕ Пропустить</button>
@@ -281,8 +283,14 @@ export default function DriverRouteManagement({ token }: { token: string }) {
                     {point.contactPhone && (
                       <div>📞 {point.contactPhone}</div>
                     )}
+                    {point.entryConditions && point.entryConditions !== point.contactPhone && (
+                      <div>📞 {point.entryConditions}</div>
+                    )}
                     {point.deliveryTime && (
                       <div>🕐 {point.deliveryTime}</div>
+                    )}
+                    {point.notes && (
+                      <div>📝 Заметка: {point.notes}</div>
                     )}
                   </div>
                 </div>
@@ -511,6 +519,9 @@ export default function DriverRouteManagement({ token }: { token: string }) {
                     rows={2}
                     style={{ flex: 1, resize: 'vertical' }}
                   />
+                  <button onClick={() => saveNotes(point.companyId)} disabled={savingNotes[point.companyId]} style={{ background: '#0d6efd', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'flex-start' }}>
+                    {savingNotes[point.companyId] ? '...' : 'Сохранить'}
+                  </button>
                 </div>
                 {savingNotes[point.companyId] && (
                   <div

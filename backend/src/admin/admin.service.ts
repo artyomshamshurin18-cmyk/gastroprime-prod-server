@@ -18,6 +18,7 @@ const safeUserSelect = {
   jobTitle: true,
   phone: true,
   allergies: true,
+  routeName: true,
   avatarUrl: true,
   status: true,
   role: true,
@@ -180,12 +181,15 @@ export class AdminService {
     return `/uploads/${folderName}/${fileName}`
   }
 
-  async getStats(companyId?: string) {
+  async getStats(start?: string, end?: string, companyId?: string) {
     const companyFilter = companyId ? { companyId } : undefined
     const userFilter = companyId ? { companyId } : undefined
+    const dateFilter: any = {};
+    if (start) dateFilter.gte = new Date(start + "T00:00:00Z");
+    if (end) dateFilter.lt = new Date(end + "T23:59:59Z");
 
     const totalUsers = await this.prisma.user.count({ where: userFilter })
-    const totalOrders = await this.prisma.order.count({ where: companyFilter })
+    const totalOrders = await this.prisma.order.count({ where: { ...(companyFilter || {}), ...(start || end ? { deliveryDate: dateFilter } : {}) } })
     const todayOrders = await this.prisma.order.count({
       where: {
         ...(companyFilter || {}),
@@ -196,7 +200,7 @@ export class AdminService {
       }
     })
     const revenue = await this.prisma.order.aggregate({
-      where: companyFilter,
+      where: { ...(companyFilter || {}), ...(start || end ? { deliveryDate: dateFilter } : {}) },
       _sum: { totalAmount: true }
     })
 
@@ -205,6 +209,7 @@ export class AdminService {
       CONFIRMED: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'CONFIRMED' } }),
       PREPARING: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'PREPARING' } }),
       READY: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'READY' } }),
+      PAID: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'PAID' } }),
       DELIVERED: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'DELIVERED' } }),
       CANCELLED: await this.prisma.order.count({ where: { ...(companyFilter || {}), status: 'CANCELLED' } })
     }
@@ -304,9 +309,9 @@ export class AdminService {
     })
   }
 
-  async getAllCompanies() {
+  async getAllCompanies(actor?: { role?: string }) {
     return this.prisma.company.findMany({
-      where: { status: { not: 'CRM_LEAD' } },
+      where: actor?.role === 'MANAGER' ? { status: 'ACTIVE' } : { status: { not: 'CRM_LEAD' } },
       include: {
         categoryPrices: {
           include: {
@@ -328,6 +333,42 @@ export class AdminService {
         }
       },
       orderBy: { name: 'asc' }
+    })
+  }
+
+  async getCompanyUsers(companyId: string) {
+    return this.prisma.user.findMany({
+      where: { companyId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        jobTitle: true,
+        phone: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' }
+    })
+  }
+
+  async updateCompanyUserRole(userId: string, role: string) {
+    const allowedRoles = ['CLIENT', 'MASTER_CLIENT']
+    if (!allowedRoles.includes(role)) {
+      throw new BadRequestException('Роль может быть только CLIENT или MASTER_CLIENT')
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+      }
     })
   }
 
@@ -369,7 +410,7 @@ export class AdminService {
               entryConditions: data.entryConditions || null,
               routeName: data.routeName || null,
               deliveryTime: data.deliveryTime || null,
-              peopleCount: data.peopleCount ? Number(data.peopleCount) : null,
+              peopleCount: data.peopleCount ? String(data.peopleCount) : null,
               notes: data.notes || null,
               mealPlan: data.mealPlan || null,
               workEmail: data.workEmail || null,
@@ -542,7 +583,7 @@ export class AdminService {
         entryConditions: normalizeText(data.entryConditions) || null,
         routeName: normalizeText(data.routeName) || null,
         deliveryTime: normalizeText(data.deliveryTime) || null,
-        peopleCount: data.peopleCount ? Number(data.peopleCount) : null,
+        peopleCount: data.peopleCount ? String(data.peopleCount) : null,
         notes: normalizeText(data.notes) || null,
         mealPlan: normalizeText(data.mealPlan) || null,
         workEmail: normalizeText(data.workEmail) || null,
@@ -699,7 +740,7 @@ export class AdminService {
         entryConditions: Object.prototype.hasOwnProperty.call(data, 'entryConditions') ? (normalizeText(data.entryConditions) || null) : existingCompany.entryConditions,
         routeName: Object.prototype.hasOwnProperty.call(data, 'routeName') ? (normalizeText(data.routeName) || null) : existingCompany.routeName,
         deliveryTime: Object.prototype.hasOwnProperty.call(data, 'deliveryTime') ? (normalizeText(data.deliveryTime) || null) : existingCompany.deliveryTime,
-        peopleCount: Object.prototype.hasOwnProperty.call(data, 'peopleCount') ? (data.peopleCount ? Number(data.peopleCount) : null) : existingCompany.peopleCount,
+        peopleCount: Object.prototype.hasOwnProperty.call(data, 'peopleCount') ? (data.peopleCount ? String(data.peopleCount) : null) : existingCompany.peopleCount,
         notes: Object.prototype.hasOwnProperty.call(data, 'notes') ? (normalizeText(data.notes) || null) : existingCompany.notes,
         mealPlan: Object.prototype.hasOwnProperty.call(data, 'mealPlan') ? (normalizeText(data.mealPlan) || null) : existingCompany.mealPlan,
         workEmail: Object.prototype.hasOwnProperty.call(data, 'workEmail') ? (normalizeText(data.workEmail) || null) : existingCompany.workEmail,
@@ -1969,7 +2010,8 @@ export class AdminService {
           include: {
             dish: {
               include: { category: true }
-            }
+            },
+            garnishDish: true
           }
         }
       }
@@ -2033,6 +2075,7 @@ export class AdminService {
           dishName: item.dish.name,
           categoryName: item.dish.category?.name || 'Без категории',
           quantity: item.quantity,
+          garnishDishName: item.garnishDish?.name || null,
         }))
       })
 
@@ -2063,9 +2106,30 @@ export class AdminService {
             dishName: item.dish.name,
             categoryName: item.dish.category?.name || 'Без категории',
             quantity: 0,
+            garnishDishName: item.garnishDish?.name || null,
           })
         }
         companyEntry.dishesMap.get(dishKey).quantity += item.quantity
+        // Add garnish dish as separate production item
+        if (item.garnishDishId) {
+          const garnishKey = item.garnishDishId + '__garnish'
+          if (!byDish.has(garnishKey)) {
+            const g = item.garnishDish
+            byDish.set(garnishKey, {
+              dishId: item.garnishDishId,
+              dishName: g.name,
+              categoryName: 'Гарниры',
+              weight: g.weight || 0,
+              measureUnit: g.measureUnit || 'GRAM',
+              totalQuantity: 0,
+              quantityByCompany: new Map(),
+              companiesMap: new Map(),
+              isGarnish: true,
+            })
+          }
+          const garnishEntry = byDish.get(garnishKey)
+          garnishEntry.totalQuantity += item.quantity
+        }
       })
     })
 
@@ -2168,7 +2232,7 @@ export class AdminService {
 
     const productionRows = summary.dishes.map((dish: any) => ({
       Категория: dish.categoryName,
-      Блюдо: dish.dishName,
+      Блюдо: `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''}`,
       Порций: dish.totalQuantity,
       'Выход на порцию': `${dish.weight || 0} ${dish.portionUnitLabel}`,
       'К производству': `${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`,
@@ -2176,7 +2240,7 @@ export class AdminService {
 
     const portioningRows = summary.dishes.map((dish: any) => ({
       Категория: dish.categoryName,
-      Блюдо: dish.dishName,
+      Блюдо: `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''}`,
       'Порций к фасовке': dish.totalQuantity,
       'На порцию': `${dish.weight || 0} ${dish.portionUnitLabel}`,
       'Итого': `${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`,
@@ -2195,7 +2259,7 @@ export class AdminService {
           'Условия заезда': company.entryConditions || '',
           Сотрудник: user.userName,
           Email: user.email,
-          Упаковать: user.items.map((item: any) => `${item.dishName} × ${item.quantity}`).join(' | '),
+          Упаковать: user.items.map((item: any) => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' | '),
           Приборов: user.utensils,
           Хлеб: user.needBread ? 'Да' : 'Нет',
           Примечание: user.notes || '',
@@ -2218,7 +2282,7 @@ export class AdminService {
         Сотрудников: company.selectionsCount,
         Доставка: company.deliveryClosing?.status === 'DELIVERED_WITH_DEVIATION' ? 'Доставлено с отклонением' : company.deliveryClosing?.status === 'DELIVERED' ? 'Доставлено' : '',
         'Сумма отклонения': company.deliveryClosing?.deviationAmount || 0,
-        Отгрузка: company.dishes.map((dish: any) => `${dish.dishName} × ${dish.quantity}`).join(' | '),
+        Отгрузка: company.dishes.map((dish: any) => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' | '),
       }))
 
     const dishesRows = summary.dishes.map((dish: any) => ({
@@ -2236,7 +2300,7 @@ export class AdminService {
       'Нужен хлеб': company.needBreadCount,
       Доставка: company.deliveryClosing?.status === 'DELIVERED_WITH_DEVIATION' ? 'Доставлено с отклонением' : company.deliveryClosing?.status === 'DELIVERED' ? 'Доставлено' : '',
       'Сумма отклонения': company.deliveryClosing?.deviationAmount || 0,
-      Блюда: company.dishes.map((dish: any) => `${dish.dishName} × ${dish.quantity}`).join(' | '),
+      Блюда: company.dishes.map((dish: any) => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' | '),
     }))
 
     const userRows = summary.companies.flatMap(company =>
@@ -2248,7 +2312,7 @@ export class AdminService {
         Приборов: user.utensils,
         Хлеб: user.needBread ? 'Да' : 'Нет',
         Примечание: user.notes || '',
-        Выбор: user.items.map(item => `${item.dishName} × ${item.quantity}`).join(' | '),
+        Выбор: user.items.map(item => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' | '),
       }))
     )
 
@@ -2286,7 +2350,7 @@ export class AdminService {
           Сотрудник: user.userName,
           Телефон: user.phone || '',
           Email: user.email,
-          Отгрузка: user.items.map((item: any) => `${item.dishName} × ${item.quantity}`).join(' | '),
+          Отгрузка: user.items.map((item: any) => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' | '),
           Приборов: user.utensils,
           Хлеб: user.needBread ? 'Да' : 'Нет',
           Примечание: user.notes || '',

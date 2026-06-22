@@ -24,10 +24,18 @@ export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gastroprime.
 
 export const company = {
   name: "GastroPrime",
-  phone: "+7 980 180 68 16",
+  phone: "+7 916 684-72-88",
   email: "info@gastroprime.ru",
+  social: {
+    telegram: "https://t.me/syrovyalnya",
+    instagram: "https://instagram.com/gastroprime.ru",
+    vk: "https://vk.ru/gastroprime",
+    whatsapp: "https://wa.me/79166847288",
+    messenger: "https://m.me/79166847288",
+    phone2: "+7 916 684-72-88",
+  },
   city: "Москва и Московская область",
-  address: "МО, Дмитров, ул. Профессиональная 26к1, офис 206",
+  address: "Дмитров, Промышленная ул., 27к5",
   legalName: "ИП Шамшурин Артем Ильич",
   inn: "50072715905",
   ogrnip: "325508100065850",

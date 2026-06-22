@@ -3,6 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_URL, PROJECT_STATUSES, BOARD_STATUSES, TASK_PRIORITIES, parseLabels } from './types';
 import CrmTaskCard from './CrmTaskCard';
+import CrmProjectChat from './CrmProjectChat';
+import CrmProjectFiles from './CrmProjectFiles';
 
 interface CrmProject {
   id: string;
@@ -73,6 +75,7 @@ export default function CrmProjectDetail({ token, projectId, onBack, onUpdate }:
     title: '', description: '', userId: '', priority: 'NORMAL', dueDate: '',
   });
   const [selectedTask, setSelectedTask] = useState<CrmTask | null>(null);
+  const [activeTab, setActiveTab] = useState<'board' | 'chat' | 'files'>('board');
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -129,7 +132,7 @@ export default function CrmProjectDetail({ token, projectId, onBack, onUpdate }:
 
   const openEdit = () => {
     if (!project) return;
-    const endDate = project.endDate ? project.endDate.split('T')[0] : '';
+    const endDate = project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '';
     setEditForm({ name: project.name, description: project.description || '', status: project.status, color: project.color || '#0d6efd', endDate });
     setShowEdit(true);
   };
@@ -307,7 +310,29 @@ const handleRestore = async () => {
             </button>
           </div>
         </div>
+                {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, marginTop: 16, borderBottom: '1px solid #e0e0e0' }}>
+          <button onClick={() => setActiveTab('board')} style={{
+            padding: '8px 16px', border: 'none', background: 'none',
+            cursor: 'pointer', fontWeight: 600, fontSize: 13, color: activeTab === 'board' ? '#0056b3' : '#888',
+            borderBottom: activeTab === 'board' ? '2px solid #0056b3' : '2px solid transparent',
+            marginBottom: -1,
+          }}>📋 Доска</button>
+          <button onClick={() => setActiveTab('chat')} style={{
+            padding: '8px 16px', border: 'none', background: 'none',
+            cursor: 'pointer', fontWeight: 600, fontSize: 13, color: activeTab === 'chat' ? '#0056b3' : '#888',
+            borderBottom: activeTab === 'chat' ? '2px solid #0056b3' : '2px solid transparent',
+            marginBottom: -1,
+          }}>💬 Обсуждения</button>
+          <button onClick={() => setActiveTab('files')} style={{
+            padding: '8px 16px', border: 'none', background: 'none',
+            cursor: 'pointer', fontWeight: 600, fontSize: 13, color: activeTab === 'files' ? '#0056b3' : '#888',
+            borderBottom: activeTab === 'files' ? '2px solid #0056b3' : '2px solid transparent',
+            marginBottom: -1,
+          }}>📁 Файлы</button>
+        </div>
         {/* Company link */}
+
         {project?.company && (
           <div style={{ marginTop: 6, fontSize: 13, color: '#0d6efd' }}>
             🏢 Компания: <a href={`/admin/companies/${project.company.id}`} style={{ color: '#0d6efd', textDecoration: 'underline' }}
@@ -353,84 +378,90 @@ const handleRestore = async () => {
       </div>
 
       {/* Kanban Board */}
-      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 20, minHeight: '50vh' }}>
-        {BOARD_STATUSES.map(col => (
-          <div key={col.value} style={{ minWidth: 260, maxWidth: 300, flex: 1 }}
-            onDragOver={e => e.preventDefault()}
-            onDrop={() => handleDrop(col.value)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 16 }}>{col.icon}</span>
-              <span style={{ fontWeight: 700, fontSize: 14 }}>{col.label}</span>
-              <span style={{ background: '#f0f0f0', borderRadius: 12, padding: '2px 8px', fontSize: 12, color: '#666' }}>
-                {boardTasks[col.value]?.length || 0}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {(boardTasks[col.value] || []).map(task => (
-                <div key={task.id} draggable onDragStart={() => handleDragStart(task.id)}
-                  onClick={() => openTaskDetail(task)}
-                  style={{
-                    background: '#fff', borderRadius: 10, padding: 12, cursor: 'pointer',
-                    border: '1px solid #e9ecef', boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                    borderLeft: `3px solid ${col.color}`,
-                    opacity: draggedTask === task.id ? 0.4 : 1,
-                  }}>
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{task.title}</div>
-                  {task.description && (
-                    <div style={{ fontSize: 12, color: '#888', marginBottom: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {task.description}
+      {activeTab === 'board' ? (
+        <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 20, minHeight: '50vh' }}>
+          {BOARD_STATUSES.map(col => (
+            <div key={col.value} style={{ minWidth: 260, maxWidth: 300, flex: 1 }}
+              onDragOver={e => e.preventDefault()}
+              onDrop={() => handleDrop(col.value)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 16 }}>{col.icon}</span>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>{col.label}</span>
+                <span style={{ background: '#f0f0f0', borderRadius: 12, padding: '2px 8px', fontSize: 12, color: '#666' }}>
+                  {boardTasks[col.value]?.length || 0}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {(boardTasks[col.value] || []).map(task => (
+                  <div key={task.id} draggable onDragStart={() => handleDragStart(task.id)}
+                    onClick={() => openTaskDetail(task)}
+                    style={{
+                      background: '#fff', borderRadius: 10, padding: 12, cursor: 'pointer',
+                      border: '1px solid #e9ecef', boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      borderLeft: `3px solid ${col.color}`,
+                      opacity: draggedTask === task.id ? 0.4 : 1,
+                    }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{task.title}</div>
+                    {task.description && (
+                      <div style={{ fontSize: 12, color: '#888', marginBottom: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {task.description}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      {task.priority && (
+                        <span style={{
+                          fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 600,
+                          background: (TASK_PRIORITIES.find(p => p.value === task.priority)?.color || '#6c757d') + '20',
+                          color: TASK_PRIORITIES.find(p => p.value === task.priority)?.color || '#6c757d',
+                        }}>
+                          {TASK_PRIORITIES.find(p => p.value === task.priority)?.label || task.priority}
+                        </span>
+                      )}
+                      {task.dueDate && (
+                        <span style={{ fontSize: 10, color: new Date(task.dueDate) < new Date() ? '#dc3545' : '#888' }}>
+                          📅 {new Date(task.dueDate).toLocaleDateString('ru-RU')}
+                        </span>
+                      )}
+                      {task.user && (
+                        <span style={{ fontSize: 10, color: '#aaa', marginLeft: 'auto' }}>
+                          👤 {task.user.firstName}
+                        </span>
+                      )}
                     </div>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    {task.priority && (
-                      <span style={{
-                        fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 600,
-                        background: (TASK_PRIORITIES.find(p => p.value === task.priority)?.color || '#6c757d') + '20',
-                        color: TASK_PRIORITIES.find(p => p.value === task.priority)?.color || '#6c757d',
-                      }}>
-                        {TASK_PRIORITIES.find(p => p.value === task.priority)?.label || task.priority}
-                      </span>
+                    {parseLabels(task.labels).length > 0 && (
+                      <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
+                        {parseLabels(task.labels).map((l: any) => (
+                          <span key={l.id} style={{
+                            fontSize: 10, padding: '1px 6px', borderRadius: 4,
+                            background: (l.color || '#6c757d') + '25', color: l.color || '#6c757d',
+                          }}>{l.name}</span>
+                        ))}
+                      </div>
                     )}
-                    {task.dueDate && (
-                      <span style={{ fontSize: 10, color: new Date(task.dueDate) < new Date() ? '#dc3545' : '#888' }}>
-                        📅 {new Date(task.dueDate).toLocaleDateString('ru-RU')}
-                      </span>
-                    )}
-                    {task.user && (
-                      <span style={{ fontSize: 10, color: '#aaa', marginLeft: 'auto' }}>
-                        👤 {task.user.firstName}
-                      </span>
+                    {task._count && (task._count.comments || task._count.attachments || task._count.subtasks) && (
+                      <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 11, color: '#aaa' }}>
+                        {task._count.comments ? <span>💬 {task._count.comments}</span> : null}
+                        {task._count.attachments ? <span>📎 {task._count.attachments}</span> : null}
+                        {task._count.subtasks ? <span>📋 {task._count.subtasks}</span> : null}
+                      </div>
                     )}
                   </div>
-                  {parseLabels(task.labels).length > 0 && (
-                    <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
-                      {parseLabels(task.labels).map((l: any) => (
-                        <span key={l.id} style={{
-                          fontSize: 10, padding: '1px 6px', borderRadius: 4,
-                          background: (l.color || '#6c757d') + '25', color: l.color || '#6c757d',
-                        }}>{l.name}</span>
-                      ))}
-                    </div>
-                  )}
-                  {task._count && (task._count.comments || task._count.attachments || task._count.subtasks) && (
-                    <div style={{ display: 'flex', gap: 8, marginTop: 6, fontSize: 11, color: '#aaa' }}>
-                      {task._count.comments ? <span>💬 {task._count.comments}</span> : null}
-                      {task._count.attachments ? <span>📎 {task._count.attachments}</span> : null}
-                      {task._count.subtasks ? <span>📋 {task._count.subtasks}</span> : null}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(!boardTasks[col.value] || boardTasks[col.value].length === 0) && (
-                <div style={{ padding: 20, textAlign: 'center', color: '#ccc', fontSize: 12, border: '1px dashed #e0e0e0', borderRadius: 10 }}>
-                  Перетащите сюда
-                </div>
-              )}
+                ))}
+                {(!boardTasks[col.value] || boardTasks[col.value].length === 0) && (
+                  <div style={{ padding: 20, textAlign: 'center', color: '#ccc', fontSize: 12, border: '1px dashed #e0e0e0', borderRadius: 10 }}>
+                    Перетащите сюда
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : activeTab === 'chat' ? (
+        <CrmProjectChat token={token} projectId={projectId} />
+      ) : (
+        <CrmProjectFiles token={token} projectId={projectId} />
+      )}
 
       {/* Task Detail Modal */}
       {selectedTask && (

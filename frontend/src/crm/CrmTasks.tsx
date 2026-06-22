@@ -61,7 +61,7 @@ export default function CrmTasks({ token }: Readonly<{ token: string; userRole?:
     try {
       const { data } = await axios.get(`${API_URL}/admin/users`, { headers });
       const users = (data.users || data || []).filter((u: any) =>
-        ['ADMIN', 'SUPERADMIN', 'MANAGER', 'OPERATOR'].includes(u.role)
+        ['ADMIN', 'SUPERADMIN', 'MANAGER', 'OPERATOR', 'CRM_OPERATOR'].includes(u.role)
       ).map((u: any) => ({ id: u.id, firstName: u.firstName || '', lastName: u.lastName || '', role: u.role }));
       setManagers(users);
     } catch (e) { /* skip */ }
@@ -79,7 +79,7 @@ export default function CrmTasks({ token }: Readonly<{ token: string; userRole?:
       };
       if (form.companyId) payload.companyId = form.companyId;
       if (form.dealId) payload.dealId = form.dealId;
-      if (form.assignedTo) payload.userId = form.assignedTo;
+      if (form.assignedTo) payload.assigneeId = form.assignedTo;
 
       await axios.post(`${API_URL}/crm/tasks`, payload, { headers });
       setShowForm(false);

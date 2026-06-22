@@ -54,6 +54,9 @@ export class AuthService {
     companyName: string;
     firstName?: string;
     phone?: string;
+    address?: string;
+    peopleCount?: string;
+    deliveryTime?: string;
   }) {
     const email = data.email.toLowerCase().trim();
     const password = data.password;
@@ -78,6 +81,9 @@ export class AuthService {
           name: companyName,
           status: 'ONBOARDING',
           accountNumber: accountNumber,
+          address: data.address || null,
+          peopleCount: data.peopleCount || null,
+          deliveryTime: data.deliveryTime || null,
           balance: 0,
           limit: 50000,
           dailyLimit: 0,

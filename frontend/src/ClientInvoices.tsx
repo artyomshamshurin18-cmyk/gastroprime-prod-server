@@ -171,6 +171,29 @@ export default function ClientInvoices({ token, onUserRefresh }: { token: string
           <button onClick={loadReconciliation} disabled={reconciliationLoading} style={{ background: '#0d6efd', color: '#fff', border: 'none', borderRadius: 6, padding: '10px 16px', width: '100%' }}>
             {reconciliationLoading ? 'Собираю...' : 'Запросить сверку'}
           </button>
+          {reconciliation && (
+            <button onClick={async () => {
+              try {
+                const response = await axios.get(`${API_URL}/users/company/reconciliation/pdf`, {
+                  params: reconciliationForm,
+                  headers: { Authorization: `Bearer ${token}` },
+                  responseType: 'blob',
+                })
+                const url = window.URL.createObjectURL(new Blob([response.data]))
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `sverka_${reconciliationForm.start}_${reconciliationForm.end}.pdf`
+                document.body.appendChild(link)
+                link.click()
+                link.remove()
+                window.URL.revokeObjectURL(url)
+              } catch (err: any) {
+                setMessage(`❌ ${err.response?.data?.message || 'Не удалось скачать PDF'}`)
+              }
+            }} style={{ background: '#198754', color: '#fff', border: 'none', borderRadius: 6, padding: '10px 16px', width: '100%' }}>
+              📄 Скачать PDF сверки
+            </button>
+          )}
         </div>
 
         {reconciliation && (

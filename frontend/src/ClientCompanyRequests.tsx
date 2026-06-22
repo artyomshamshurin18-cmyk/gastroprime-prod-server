@@ -106,7 +106,7 @@ export default function ClientCompanyRequests({ token }: { token: string }) {
                     </div>
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: employee.weeklyStatus === 'DRAFT' ? '#fd7e14' : employee.weeklyStatus === 'CONFIRMED' ? '#0d6efd' : employee.weeklyStatus === 'PAID' ? '#28a745' : employee.weeklyStatus === 'DEFERRED' ? '#fd7e14' : '#fd7e14' }}>
-                    {employee.weeklyStatus === 'DRAFT' ? 'Черновик' : employee.weeklyStatus === 'CONFIRMED' ? 'В заявке' : employee.weeklyStatus === 'PAID' ? 'Оплачено' : employee.weeklyStatus === 'DEFERRED' ? 'Отсрочка' : 'Черновик'}
+                    {employee.weeklyStatus === 'DRAFT' ? 'Черновик' : employee.weeklyStatus === 'CONFIRMED' ? 'В заявке' : employee.weeklyStatus === 'PAID' ? 'Оплачено' : employee.weeklyStatus === 'DEFERRED' ? 'Отсрочка' : employee.weeklyStatus === 'COMPLETED' ? 'Выполнено' : 'Черновик'}
                     {(employee.weeklyStatus === 'PAID' || employee.weeklyStatus === 'DEFERRED') && (
                       <button onClick={async () => {
                         if (!confirm('Отменить заявку? ' + (employee.weeklyStatus === 'PAID' ? 'Средства вернутся на баланс.' : 'Отсрочка будет аннулирована.'))) return;

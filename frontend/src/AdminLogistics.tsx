@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from './api-config';
 
-
 const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [weekDates, setWeekDates] = useState<string[]>([]);
@@ -14,7 +13,7 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
   const [expandedCell, setExpandedCell] = useState<string | null>(null);
 
   const [newPoint, setNewPoint] = useState({
-    routeName: '', date: '', type: 'custom', address: '',
+    routeName: '', date: '', type: 'delivery', address: '',
     contactPerson: '', contactPhone: '', timeWindowStart: '', timeWindowEnd: '',
     note: '', driverId: ''
   });
@@ -61,6 +60,49 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
           } catch { allPoints[key] = []; }
         }
       }
+
+      // Загружаем сводку для каждой даты недели — компании с выборами
+      for (const wDate of weekDates) {
+        try {
+          const summaryRes = await axios.get(`${API_URL}/admin/kitchen-summary?date=${wDate}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const summaryCompanies: any[] = summaryRes.data?.companies || [];
+          if (Array.isArray(summaryCompanies)) {
+            summaryCompanies.forEach((comp: any) => {
+              const rn = comp.routeName || 'unknown';
+              const companyName = comp.companyName || comp.name || '';
+              if (companyName && rn) {
+                const key = `${rn}|${wDate}`;
+                if (!Array.isArray(allPoints[key])) allPoints[key] = [];
+                const exists = allPoints[key].some((p: any) =>
+                  (p.note && p.note.includes(companyName)) ||
+                  (p.address && comp.address && p.address.includes(comp.address))
+                );
+                if (!exists) {
+                  allPoints[key].push({
+                    id: `summary-${comp.companyId || Math.random()}`,
+                    type: 'delivery',
+                    address: comp.address || companyName,
+                    contactPerson: comp.contactPerson || '',
+                    contactPhone: comp.contactPhone || '',
+                    timeWindowStart: comp.deliveryTime?.split('-')[0]?.trim() || '',
+                    timeWindowEnd: comp.deliveryTime?.split('-')[1]?.trim() || '',
+                    note: `${companyName} — ${comp.totalPortions || 0} порций`,
+                    driverId: null,
+                    status: 'pending',
+                    sortOrder: 0,
+                    _fromSummary: true,
+                  });
+                }
+              }
+            });
+          }
+        } catch (e) {
+          // Нет данных на эту дату — норм
+        }
+      }
+
       setRoutePoints(allPoints);
     } catch (e) { console.error(e); }
     setLoading(false);
@@ -71,11 +113,16 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
       ...newPoint, date: newPoint.date || selectedDate,
     }, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } });
     setShowModal(false);
-    setNewPoint({ routeName: '', date: '', type: 'custom', address: '', contactPerson: '', contactPhone: '', timeWindowStart: '', timeWindowEnd: '', note: '', driverId: '' });
+    setNewPoint({ routeName: '', date: '', type: 'delivery', address: '', contactPerson: '', contactPhone: '', timeWindowStart: '', timeWindowEnd: '', note: '', driverId: '' });
     loadData();
   };
 
   const deletePoint = async (id: string) => {
+    if (id.startsWith('summary-')) {
+      // Точка из сводки — не удаляем из БД
+      loadData();
+      return;
+    }
     await axios.delete(`${API_URL}/logistics/points/${id}`, { headers: { Authorization: `Bearer ${token}` } });
     loadData();
   };
@@ -88,8 +135,6 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>🚚 Логистика</h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
-            style={inputStyle} />
           <button onClick={() => setShowModal(true)}
             style={{ background: '#b53b1f', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>
             + Добавить точку
@@ -106,7 +151,7 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
               <tr>
                 <th style={thStyle}>Маршрут</th>
                 {weekDates.map((date, i) => (
-                  <th key={date} style={{ ...thStyle, background: date === today ? '#fff3e0' : '#f5f5f5', minWidth: 130 }}>
+                  <th key={date} style={{ ...thStyle, background: date === today ? '#fff3e0' : '#f5f5f5', minWidth: 140 }}>
                     {dayNames[i]}<br/><span style={{ fontSize: 11, color: '#666' }}>{date.slice(5)}</span>
                     {date === today && <span style={{ fontSize: 10, color: '#b53b1f', display: 'block' }}>сегодня</span>}
                   </th>
@@ -146,22 +191,25 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
                       );
                     })}
                   </tr>
-                  {expandedCell?.startsWith(route) && (
+                  {expandedCell && expandedCell.startsWith(route) && (
                     <tr>
                       <td colSpan={8} style={{ padding: 12, background: '#fef3e2', borderBottom: '1px solid #e0d5c8' }}>
                         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-                          Детали: {route} — {expandedCell.split('|')[1]}
+                          Детали: Рейс {route} — {expandedCell.split('|')[1]}
                         </div>
                         {(routePoints[expandedCell] || []).length === 0 && <div style={{ color: '#999' }}>Нет точек</div>}
                         {(routePoints[expandedCell] || []).map((point: any) => (
                           <div key={point.id} style={{
-                            background: 'white', borderRadius: 8, padding: 10, marginBottom: 8,
-                            border: '1px solid #e0d5c8', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'
+                            background: point._fromSummary ? '#f0f7ec' : 'white',
+                            borderRadius: 8, padding: 10, marginBottom: 8,
+                            border: point._fromSummary ? '1px solid #c8e6c9' : '1px solid #e0d5c8',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'
                           }}>
-                            <div>
+                            <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: 600 }}>
-                                {point.type === 'pickup' ? '📦 Забор' : point.type === 'tasting' ? '🍽 Дегустация' : '📍'}{' '}
+                                {point.type === 'pickup' ? '📦 Забор' : point.type === 'tasting' ? '🍽 Дегустация' : '📍 Доставка'}{' '}
                                 {point.address}
+                                {point._fromSummary && <span style={{ fontSize: 10, color: '#388e3c', marginLeft: 6 }}>(из сводки)</span>}
                               </div>
                               <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
                                 {point.contactPerson && <span>👤 {point.contactPerson}</span>}
@@ -169,11 +217,10 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
                               </div>
                               <div style={{ fontSize: 12, color: '#666' }}>
                                 {point.timeWindowStart && <span>🕐 {point.timeWindowStart}-{point.timeWindowEnd}</span>}
-                                {point.driver && <span style={{ marginLeft: 8 }}>🚚 {point.driver.firstName}</span>}
                               </div>
                               {point.note && <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>📝 {point.note}</div>}
                             </div>
-                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
                               <span style={{
                                 fontSize: 11, padding: '2px 6px', borderRadius: 4,
                                 background: point.status === 'done' ? '#e8f5e9' : point.status === 'skipped' ? '#ffebee' : '#fff3e0',
@@ -181,9 +228,11 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
                               }}>
                                 {point.status === 'done' ? '✅' : point.status === 'skipped' ? '❌' : '⏳'}
                               </span>
-                              <button onClick={() => deletePoint(point.id)} style={{
-                                background: 'none', border: 'none', cursor: 'pointer', color: '#c62828', fontSize: 16
-                              }} title="Удалить">🗑</button>
+                              {!point._fromSummary && (
+                                <button onClick={() => deletePoint(point.id)} style={{
+                                  background: 'none', border: 'none', cursor: 'pointer', color: '#c62828', fontSize: 16
+                                }} title="Удалить">🗑</button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -220,9 +269,10 @@ const AdminLogistics: React.FC<{ token: string }> = ({ token }) => {
             <input type="date" value={newPoint.date || selectedDate} onChange={e => setNewPoint({...newPoint, date: e.target.value})} style={inputStyle} />
             <label style={labelStyle}>Тип</label>
             <select value={newPoint.type} onChange={e => setNewPoint({...newPoint, type: e.target.value})} style={inputStyle}>
-              <option value="custom">📍 Обычная</option>
+              <option value="delivery">📍 Доставка</option>
               <option value="pickup">📦 Забор</option>
               <option value="tasting">🍽 Дегустация</option>
+              <option value="custom">📍 Обычная</option>
             </select>
             <label style={labelStyle}>Адрес</label>
             <input type="text" value={newPoint.address} onChange={e => setNewPoint({...newPoint, address: e.target.value})} style={inputStyle} placeholder="ул. Примерная, 5" />

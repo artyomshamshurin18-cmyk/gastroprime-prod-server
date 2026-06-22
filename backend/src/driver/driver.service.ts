@@ -6,7 +6,7 @@ export class DriverService {
   constructor(private prisma: PrismaService) {}
 
   async getRoutes(driverId: string, date: string) {
-    const targetDate = new Date(date);
+    const targetDate = new Date(date + 'T00:00:00Z');
     if (!date || Number.isNaN(targetDate.getTime())) {
       throw new ForbiddenException('Укажите корректную дату');
     }
@@ -128,9 +128,20 @@ export class DriverService {
       }
     }
 
+    // Podgruzhaem zametki voditelya
+    const driverRouteNotes = await this.prisma.driverRouteCompany.findMany({
+      where: {
+        companyId: { in: Array.from(companyDataMap.keys()) },
+        driverRoute: { driverId, date: targetDate },
+      },
+      select: { companyId: true, driverNote: true },
+    });
+    const noteMap = new Map(driverRouteNotes.map(n => [n.companyId, n.driverNote]));
+
     const enrichedCompanies = Array.from(companyDataMap.values()).map((cd: any) => ({
       companyId: cd.companyId,
       companyName: cd.companyName,
+      notes: noteMap.get(cd.companyId) || '',
       contactPerson: cd.contactPerson,
       contactPhone: cd.contactPhone,
       address: cd.address,
@@ -151,10 +162,24 @@ export class DriverService {
       employees: cd.employees,
     }));
 
+    // Добавляем точки из LogisticsPoint для этого водителя
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    const logisticsPoints = driver.routeName ? await this.prisma.logisticsPoint.findMany({
+      where: {
+        routeName: driver.routeName,
+        date: { gte: startOfDay, lte: endOfDay },
+      },
+      orderBy: { sortOrder: 'asc' },
+    }) : [];
+
     return {
       date,
       driverId,
       companies: enrichedCompanies,
+      logisticsPoints,
     };
   }
 
@@ -170,7 +195,7 @@ export class DriverService {
     });
     if (!company) throw new ForbiddenException('Компания не найдена в вашем маршруте');
 
-    const targetDate = new Date(date);
+    const targetDate = new Date(date + 'T00:00:00Z');
     let driverRoute = await this.prisma.driverRoute.findUnique({
       where: { driverId_date: { driverId, date: targetDate } },
     });
@@ -197,6 +222,7 @@ export class DriverService {
   }
 
   async updateNote(driverId: string, companyId: string, date: string, driverNote: string) {
+    console.log('[DEB_NOTE] updateNote driver=' + driverId.slice(0,8) + ' company=' + companyId.slice(0,8) + ' date=' + date + ' note="' + (driverNote||'').slice(0,30) + '"');
     const driver = await this.prisma.user.findUnique({
       where: { id: driverId },
       select: { routeName: true },
@@ -208,7 +234,7 @@ export class DriverService {
     });
     if (!company) throw new ForbiddenException('Компания не найдена в вашем маршруте');
 
-    const targetDate = new Date(date);
+    const targetDate = new Date(date + 'T00:00:00Z');
     let driverRoute = await this.prisma.driverRoute.findUnique({
       where: { driverId_date: { driverId, date: targetDate } },
     });

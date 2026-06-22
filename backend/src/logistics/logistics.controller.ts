@@ -50,7 +50,7 @@ export class LogisticsController {
   @Get('my-points/:date')
   @UseGuards(AuthGuard('jwt'))
   async getMyPoints(@Param('date') date: string, @Req() req: any) {
-    const driverId = req.user.id;
+    const driverId = req.user.userId;
     return this.logisticsService.getDriverPoints(driverId, date);
   }
 }

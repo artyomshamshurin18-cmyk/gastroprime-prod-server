@@ -47,7 +47,7 @@ export default async function SolutionPage({ params }: PageProps) {
         <Link href="/" className="text-sm text-slate-500 transition hover:text-slate-950">← На главную</Link>
         <div className="mt-6 grid gap-10 lg:grid-cols-[1.1fr,0.9fr] lg:items-start">
           <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">{solution.shortLabel}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">{solution.shortLabel}</p>
             <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">{solution.heroTitle}</h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-600">{solution.heroSubtitle}</p>
             <div className="flex flex-wrap gap-3 text-sm text-slate-600">
@@ -78,7 +78,7 @@ export default async function SolutionPage({ params }: PageProps) {
               ))}
             </ul>
           </div>
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Что должно обещать GastroPrime</h2>
             <ul className="mt-6 grid gap-4 text-sm leading-7 text-slate-700">
               {solution.outcomes.map((item) => (
@@ -98,7 +98,7 @@ export default async function SolutionPage({ params }: PageProps) {
         <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {solution.sampleMenu.map((item) => (
             <div key={item.name} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600">{item.price}</div>
+              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-600">{item.price}</div>
               <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">{item.name}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
             </div>

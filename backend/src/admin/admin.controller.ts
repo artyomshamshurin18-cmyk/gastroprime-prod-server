@@ -13,8 +13,8 @@ export class AdminController {
   constructor(private adminService: AdminService) {}
 
   @Get("stats")
-  async getStats(@Query("companyId") companyId?: string) {
-    return this.adminService.getStats(companyId)
+  async getStats(@Query("start") start: string, @Query("end") end: string, @Query("companyId") companyId?: string) {
+    return this.adminService.getStats(start, end, companyId)
   }
 
   @Get("user-analytics")
@@ -111,8 +111,18 @@ export class AdminController {
   }
 
   @Get("companies")
-  async getAllCompanies() {
-    return this.adminService.getAllCompanies()
+  async getAllCompanies(@Request() req) {
+    return this.adminService.getAllCompanies(req.user)
+  }
+
+  @Get("companies/:id/users")
+  async getCompanyUsers(@Param("id") id: string) {
+    return this.adminService.getCompanyUsers(id)
+  }
+
+  @Patch("companies/:id/users/:userId/role")
+  async updateCompanyUserRole(@Param("userId") userId: string, @Body() body: { role: string }) {
+    return this.adminService.updateCompanyUserRole(userId, body.role)
   }
 
   @Get("reconciliation")

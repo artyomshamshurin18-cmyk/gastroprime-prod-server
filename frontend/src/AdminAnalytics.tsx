@@ -57,7 +57,7 @@ export default function AdminAnalytics({ token }: { token: string }) {
       }
 
       const [statsResponse, usersResponse, abcResponse] = await Promise.all([
-        axios.get(`${API_URL}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/admin/stats`, { headers: { Authorization: `Bearer ${token}` }, params }),
         axios.get(`${API_URL}/admin/user-analytics`, { headers: { Authorization: `Bearer ${token}` }, params }),
         axios.get(`${API_URL}/admin/abc-analysis`, { headers: { Authorization: `Bearer ${token}` }, params }),
       ])
@@ -100,12 +100,12 @@ export default function AdminAnalytics({ token }: { token: string }) {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <label style={{ display: 'grid', gap: 2, flex: '1 1 120px', minWidth: 0 }}>
               <span style={{ fontSize: 11, color: '#64748b' }}>С</span>
-              <input type="date" value={filters.start} onChange={(e) => setFilters(prev => ({ ...prev, start: e.target.value }))}
+              <input type="date" value={filters.start} onChange={(e) => { const v = e.target.value; setFilters(prev => ({ ...prev, start: v })); if (v || filters.end) setTimeout(() => loadAnalytics({ ...filters, start: v }), 100); }}
                 style={{ width: '100%', boxSizing: 'border-box', fontSize: 14, padding: '8px 10px', borderRadius: 8, border: '1px solid #ddd' }} />
             </label>
             <label style={{ display: 'grid', gap: 2, flex: '1 1 120px', minWidth: 0 }}>
               <span style={{ fontSize: 11, color: '#64748b' }}>По</span>
-              <input type="date" value={filters.end} onChange={(e) => setFilters(prev => ({ ...prev, end: e.target.value }))}
+              <input type="date" value={filters.end} onChange={(e) => { const v = e.target.value; setFilters(prev => ({ ...prev, end: v })); if (v || filters.start) setTimeout(() => loadAnalytics({ ...filters, end: v }), 100); }}
                 style={{ width: '100%', boxSizing: 'border-box', fontSize: 14, padding: '8px 10px', borderRadius: 8, border: '1px solid #ddd' }} />
             </label>
             <button onClick={() => loadAnalytics()} disabled={loading} style={{ background: '#0d6efd', color: 'white', border: 'none', borderRadius: 8, padding: '9px 14px', fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}>

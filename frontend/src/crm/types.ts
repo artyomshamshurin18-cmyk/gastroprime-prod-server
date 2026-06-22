@@ -8,6 +8,7 @@ export const CRM_STAGES = [
   { value: 'QUOTE_SENT', label: '\u041a\u041f \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e', color: '#8e44ad', icon: '\ud83d\udce9' },
   { value: 'CONTRACT', label: '\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442', color: '#28a745', icon: '\ud83d\udcdd' },
   { value: 'DEFERRED', label: '\u041e\u0442\u043b\u043e\u0436\u0435\u043d\u044b\u0435', color: '#e67e22', icon: '\u23f3' },
+  { value: 'LOST', label: '\u041f\u0440\u043e\u0438\u0433\u0440\u0430\u043d\u043d\u044b\u0435', color: '#dc3545', icon: '\ud83d\udc94' },
   { value: 'CONTRACT_SIGNED', label: '\u0414\u043e\u0433\u043e\u0432\u043e\u0440 \u043f\u043e\u0434\u043f\u0438\u0441\u0430\u043d', color: '#198754', icon: '\u270d\ufe0f' },
 ];
 

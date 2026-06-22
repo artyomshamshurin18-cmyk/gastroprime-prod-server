@@ -8,39 +8,39 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  firstName String?
-  lastName  String?
-  jobTitle  String?
-  phone     String?
-  allergies String?
-  avatarUrl String?
-  role      String   @default("CLIENT")
-  status    String   @default("ACTIVE")
-  companyId String?
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  firstName        String?
+  lastName         String?
+  jobTitle         String?
+  phone            String?
+  allergies        String?
+  avatarUrl        String?
+  role             String   @default("CLIENT")
+  status           String   @default("ACTIVE")
+  companyId        String?
   mealModeOverride String?
-  setTypeOverride String?
-  isHalal   Boolean  @default(false)
-  isVip     Boolean  @default(false)
-  avoidGarlic Boolean @default(false)
-  avoidMayonnaise Boolean @default(false)
-  routeName       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  setTypeOverride  String?
+  isHalal          Boolean  @default(false)
+  isVip            Boolean  @default(false)
+  avoidGarlic      Boolean  @default(false)
+  avoidMayonnaise  Boolean  @default(false)
+  routeName        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  company        Company?    @relation("CompanyMembers", fields: [companyId], references: [id])
-  ownedCompany   Company?    @relation("CompanyOwner")
-  orders         Order[]
-  weeklyMenus    WeeklyMenu[]
-  attendanceDays EmployeeAttendance[]
-  supportMessages SupportMessage[]
-  chatParticipants ChatParticipant[]
-  chatMessages    ChatMessage[]      @relation("ChatMessageSender")
-  createdChatInvites ChatInvite[]    @relation("ChatInviteCreator")
+  company             Company?             @relation("CompanyMembers", fields: [companyId], references: [id])
+  ownedCompany        Company?             @relation("CompanyOwner")
+  orders              Order[]
+  weeklyMenus         WeeklyMenu[]
+  attendanceDays      EmployeeAttendance[]
+  supportMessages     SupportMessage[]
+  chatParticipants    ChatParticipant[]
+  chatMessages        ChatMessage[]        @relation("ChatMessageSender")
+  createdChatInvites  ChatInvite[]         @relation("ChatInviteCreator")
   guestInviteSessions ChatInviteGuest[]
-  driverRoutes       DriverRoute[]
+  driverRoutes        DriverRoute[]
 
   // CRM relations
   managedDeals       CrmDeal[]           @relation("CrmDealManager")
@@ -49,7 +49,9 @@ model User {
   assignedTasks      CrmTask[]           @relation("CrmTaskUser")
   taskAttachments    CrmTaskAttachment[] @relation("CrmTaskAttachmentUser")
   taskComments       CrmTaskComment[]    @relation("CrmTaskCommentUser")
-  logisticsPoints    LogisticsPoint[]     @relation("LogisticsPointDriver")
+  logisticsPoints    LogisticsPoint[]    @relation("LogisticsPointDriver")
+
+  projectMessages CrmProjectMessage[]
 }
 
 model Company {
@@ -67,7 +69,7 @@ model Company {
   billingDetails  String?
   entryConditions String?
   deliveryTime    String?
-  peopleCount     Int?
+  peopleCount     String?
   notes           String?
   mealPlan        String?
   workEmail       String?
@@ -81,18 +83,18 @@ model Company {
   userId          String? @unique
   user            User?   @relation("CompanyOwner", fields: [userId], references: [id])
 
-  users            User[]            @relation("CompanyMembers")
-  orders           Order[]
-  deliveryClosings DeliveryClosing[]
-  invoices         Invoice[]
-  supportMessages  SupportMessage[]
-  chatConversations ChatConversation[]
-  chatInvites      ChatInvite[]
-  categoryPrices   CompanyCategoryPrice[]
-  files            CompanyFile[]
-  companyDocuments CompanyDocument[]
+  users                User[]                 @relation("CompanyMembers")
+  orders               Order[]
+  deliveryClosings     DeliveryClosing[]
+  invoices             Invoice[]
+  supportMessages      SupportMessage[]
+  chatConversations    ChatConversation[]
+  chatInvites          ChatInvite[]
+  categoryPrices       CompanyCategoryPrice[]
+  files                CompanyFile[]
+  companyDocuments     CompanyDocument[]
   driverRouteCompanies DriverRouteCompany[]
-  logisticsPoints LogisticsPoint[] @relation("LogisticsPointCompany")
+  logisticsPoints      LogisticsPoint[]       @relation("LogisticsPointCompany")
 
   // CRM relations
   crmDeals      CrmDeal[]      @relation("CrmDealCompany")
@@ -166,32 +168,33 @@ model Category {
   name      String   @unique
   createdAt DateTime @default(now())
 
-  dishes Dish[]
+  dishes        Dish[]
   companyPrices CompanyCategoryPrice[]
 }
 
 model Dish {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  photoUrl    String?
-  price       Int
-  calories    Int?
-  weight      Int?
-  measureUnit String   @default("GRAM")
-  containsPork Boolean @default(false)
-  containsGarlic Boolean @default(false)
-  containsMayonnaise Boolean @default(false)
-  breakfastPart String?
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  name               String
+  description        String?
+  photoUrl           String?
+  price              Int
+  calories           Int?
+  weight             Int?
+  measureUnit        String   @default("GRAM")
+  containsPork       Boolean  @default(false)
+  containsGarlic     Boolean  @default(false)
+  containsMayonnaise Boolean  @default(false)
+  breakfastPart      String?
+  categoryId         String
+  category           Category @relation(fields: [categoryId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  orderItems     OrderItem[]
-  dailyMenuItems DailyMenuItem[] @relation("dish_items")
-  garnishMenuItems DailyMenuItem[] @relation("garnish_items")
-  selectedDishes SelectedDish[]
+  orderItems               OrderItem[]
+  dailyMenuItems           DailyMenuItem[] @relation("dish_items")
+  garnishMenuItems         DailyMenuItem[] @relation("garnish_items")
+  selectedDishes           SelectedDish[]
+  selectedDishGarnishItems SelectedDish[]  @relation("selected_dish_garnish")
 }
 
 // Меню на конкретный день
@@ -206,63 +209,64 @@ model DailyMenu {
 
 // Блюда в меню на день (с лимитом количества)
 model DailyMenuItem {
-  id          String @id @default(uuid())
-  dailyMenuId String
-  dishId      String
-  maxQuantity Int    @default(100)
-  sortOrder   Int    @default(0)
+  id            String  @id @default(uuid())
+  dailyMenuId   String
+  dishId        String
+  maxQuantity   Int     @default(100)
+  sortOrder     Int     @default(0)
   garnishDishId String?
-  garnishDish Dish? @relation("garnish_items", fields: [garnishDishId], references: [id])
-  
-  dailyMenu   DailyMenu @relation(fields: [dailyMenuId], references: [id], onDelete: Cascade)
-  dish        Dish      @relation("dish_items", fields: [dishId], references: [id])
+  garnishDish   Dish?   @relation("garnish_items", fields: [garnishDishId], references: [id])
 
+  dailyMenu DailyMenu @relation(fields: [dailyMenuId], references: [id], onDelete: Cascade)
+  dish      Dish      @relation("dish_items", fields: [dishId], references: [id])
 
   @@unique([dailyMenuId, dishId])
 }
 
 // Выбор клиента на неделю/период
 model WeeklyMenu {
-  id          String   @id @default(uuid())
-  userId      String
-  startDate   DateTime
-  endDate     DateTime
-  status      String   @default("DRAFT")
-  chargedAt   DateTime?
-  chargedAmount Int    @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  user        User          @relation(fields: [userId], references: [id])
-  selections  DaySelection[]
-  
+  id            String    @id @default(uuid())
+  userId        String
+  startDate     DateTime
+  endDate       DateTime
+  status        String    @default("DRAFT")
+  chargedAt     DateTime?
+  chargedAmount Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user       User           @relation(fields: [userId], references: [id])
+  selections DaySelection[]
+
   @@index([userId])
 }
 
 // Выбор на конкретный день
 model DaySelection {
-  id            String   @id @default(uuid())
-  weeklyMenuId  String
-  date          DateTime
-  utensils      Int      @default(1)
-  needBread     Boolean  @default(true)
-  notes         String?
-  
-  weeklyMenu    WeeklyMenu       @relation(fields: [weeklyMenuId], references: [id], onDelete: Cascade)
-  items         SelectedDish[]
-  
+  id           String   @id @default(uuid())
+  weeklyMenuId String
+  date         DateTime
+  utensils     Int      @default(1)
+  needBread    Boolean  @default(true)
+  notes        String?
+
+  weeklyMenu WeeklyMenu     @relation(fields: [weeklyMenuId], references: [id], onDelete: Cascade)
+  items      SelectedDish[]
+
   @@unique([weeklyMenuId, date])
 }
 
 // Выбранное блюдо на день
 model SelectedDish {
-  id             String @id @default(uuid())
+  id             String  @id @default(uuid())
   daySelectionId String
   dishId         String
-  quantity       Int    @default(1)
-  
-  daySelection   DaySelection @relation(fields: [daySelectionId], references: [id], onDelete: Cascade)
-  dish           Dish         @relation(fields: [dishId], references: [id])
+  quantity       Int     @default(1)
+  garnishDishId  String?
+
+  daySelection DaySelection @relation(fields: [daySelectionId], references: [id], onDelete: Cascade)
+  dish         Dish         @relation(fields: [dishId], references: [id])
+  garnishDish  Dish?        @relation("selected_dish_garnish", fields: [garnishDishId], references: [id])
 }
 
 model EmployeeAttendance {
@@ -280,20 +284,20 @@ model EmployeeAttendance {
 }
 
 model Order {
-  id            String      @id @default(uuid())
-  orderNumber   String      @unique
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  companyId     String
-  company       Company     @relation(fields: [companyId], references: [id])
-  status        String      @default("PENDING")
-  totalAmount   Int
-  deliveryDate  DateTime
-  deliveryTime  String?
-  comment       String?
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  orderNumber  String      @unique
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  companyId    String
+  company      Company     @relation(fields: [companyId], references: [id])
+  status       String      @default("PENDING")
+  totalAmount  Int
+  deliveryDate DateTime
+  deliveryTime String?
+  comment      String?
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model OrderItem {
@@ -307,45 +311,45 @@ model OrderItem {
 }
 
 model Invoice {
-  id                   String   @id @default(uuid())
-  number               String   @unique
-  companyId            String
-  type                 String   @default("PERIOD")
-  status               String   @default("ISSUED")
-  periodStart          DateTime?
-  periodEnd            DateTime?
-  issueDate            DateTime @default(now())
-  dueDate              DateTime?
-  currency             String   @default("KZT")
-  subtotal             Int      @default(0)
-  deviationTotal       Int      @default(0)
-  total                Int      @default(0)
-  comment              String?
-  buyerSnapshotName    String
-  buyerSnapshotAddress String?
-  buyerSnapshotDetails String?
-  sellerSnapshotName   String
+  id                    String    @id @default(uuid())
+  number                String    @unique
+  companyId             String
+  type                  String    @default("PERIOD")
+  status                String    @default("ISSUED")
+  periodStart           DateTime?
+  periodEnd             DateTime?
+  issueDate             DateTime  @default(now())
+  dueDate               DateTime?
+  currency              String    @default("KZT")
+  subtotal              Int       @default(0)
+  deviationTotal        Int       @default(0)
+  total                 Int       @default(0)
+  comment               String?
+  buyerSnapshotName     String
+  buyerSnapshotAddress  String?
+  buyerSnapshotDetails  String?
+  sellerSnapshotName    String
   sellerSnapshotAddress String?
   sellerSnapshotDetails String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   lines   InvoiceLine[]
 }
 
 model InvoiceLine {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   invoiceId       String
   date            DateTime?
   description     String
   quantity        Int?
   unitPrice       Int?
-  amount          Int      @default(0)
-  deviationAmount Int      @default(0)
-  total           Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  amount          Int       @default(0)
+  deviationAmount Int       @default(0)
+  total           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
@@ -382,11 +386,11 @@ model ChatConversation {
 }
 
 model ChatParticipant {
-  id                    String   @id @default(uuid())
+  id                    String    @id @default(uuid())
   conversationId        String
   userId                String
-  canManageParticipants Boolean  @default(false)
-  joinedAt              DateTime @default(now())
+  canManageParticipants Boolean   @default(false)
+  joinedAt              DateTime  @default(now())
   lastReadAt            DateTime?
 
   conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -428,16 +432,16 @@ model ChatAttachment {
 }
 
 model ChatInvite {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   conversationId  String
   companyId       String
   createdByUserId String
-  token           String   @unique
+  token           String    @unique
   label           String?
   expiresAt       DateTime?
   revokedAt       DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   conversation ChatConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -449,14 +453,14 @@ model ChatInvite {
 }
 
 model ChatInviteGuest {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   inviteId    String
-  userId      String   @unique
-  accessToken String   @unique
+  userId      String    @unique
+  accessToken String    @unique
   guestName   String
   guestEmail  String?
   guestPhone  String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   lastSeenAt  DateTime?
 
   invite ChatInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
@@ -497,19 +501,19 @@ model DriverRoute {
 }
 
 model DriverRouteCompany {
-  id               String   @id @default(uuid())
-  driverRouteId    String
-  companyId        String
-  deliveryStatus   String   @default("PENDING")
-  statusChangedAt  DateTime?
-  arrivedAt        DateTime?
-  unloadedAt       DateTime?
-  departedAt       DateTime?
-  driverNote       String?
-  sortOrder        Int      @default(0)
-  garnishDishId String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String    @id @default(uuid())
+  driverRouteId   String
+  companyId       String
+  deliveryStatus  String    @default("PENDING")
+  statusChangedAt DateTime?
+  arrivedAt       DateTime?
+  unloadedAt      DateTime?
+  departedAt      DateTime?
+  driverNote      String?
+  sortOrder       Int       @default(0)
+  garnishDishId   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   driverRoute DriverRoute @relation(fields: [driverRouteId], references: [id], onDelete: Cascade)
   company     Company     @relation(fields: [companyId], references: [id])
@@ -519,24 +523,24 @@ model DriverRouteCompany {
 }
 
 model LogisticsPoint {
-  id             String   @id @default(uuid())
-  companyId      String?
-  driverId       String   @map("driverId")
-  routeName      String?
-  date           DateTime
-  type           String   @default("point")
-  address        String?
-  contactPerson  String?
-  contactPhone   String?
+  id              String   @id @default(uuid())
+  companyId       String?
+  driverId        String   @map("driverId")
+  routeName       String?
+  date            DateTime
+  type            String   @default("point")
+  address         String?
+  contactPerson   String?
+  contactPhone    String?
   timeWindowStart String?
-  timeWindowEnd  String?
-  note           String?
-  fileUrl        String?
-  sortOrder      Int      @default(0)
-  garnishDishId String?
-  status         String   @default("pending")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  timeWindowEnd   String?
+  note            String?
+  fileUrl         String?
+  sortOrder       Int      @default(0)
+  garnishDishId   String?
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   company Company? @relation("LogisticsPointCompany", fields: [companyId], references: [id])
   driver  User?    @relation("LogisticsPointDriver", fields: [driverId], references: [id])
@@ -563,8 +567,8 @@ model CrmDeal {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  company Company  @relation("CrmDealCompany", fields: [companyId], references: [id])
-  manager User?    @relation("CrmDealManager", fields: [managerId], references: [id])
+  company Company @relation("CrmDealCompany", fields: [companyId], references: [id])
+  manager User?   @relation("CrmDealManager", fields: [managerId], references: [id])
 
   logs CrmDealLog[]
 }
@@ -609,8 +613,9 @@ model CrmProject {
   updatedAt   DateTime  @updatedAt
   endDate     DateTime?
 
-  company Company?           @relation("CrmProjectCompany", fields: [companyId], references: [id])
-  members CrmProjectMember[]
+  company  Company?            @relation("CrmProjectCompany", fields: [companyId], references: [id])
+  members  CrmProjectMember[]
+  messages CrmProjectMessage[]
 }
 
 model CrmProjectMember {
@@ -659,23 +664,23 @@ model CrmRouteStop {
 }
 
 model CrmTask {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  userId      String
-  dealId      String?
-  companyId   String?
-  type        String    @default("FOLLOW_UP")
-  priority    String    @default("NORMAL")
-  status      String    @default("PENDING")
-  dueDate     DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  projectId   String?
-  sortOrder   Int       @default(0)
-  boardStatus String    @default("TODO")
-  labels      String[]  @default([])
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  userId       String
+  dealId       String?
+  companyId    String?
+  type         String    @default("FOLLOW_UP")
+  priority     String    @default("NORMAL")
+  status       String    @default("PENDING")
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  projectId    String?
+  sortOrder    Int       @default(0)
+  boardStatus  String    @default("TODO")
+  labels       String[]  @default([])
   parentTaskId String?
 
   company Company? @relation("CrmTaskCompany", fields: [companyId], references: [id])
@@ -731,14 +736,39 @@ model CrmTaskChecklistItem {
 }
 
 model CrmTaskComment {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   taskId    String
   userId    String
   text      String
-  mentions  String[]  @default([])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  mentions  String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   task CrmTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User?   @relation("CrmTaskCommentUser", fields: [userId], references: [id])
+}
+
+model CrmProjectMessage {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project     CrmProject             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User?                  @relation(fields: [userId], references: [id])
+  attachments CrmProjectAttachment[]
+}
+
+model CrmProjectAttachment {
+  id        String   @id @default(uuid())
+  messageId String?
+  projectId String?
+  fileName  String
+  fileUrl   String
+  fileSize  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  message CrmProjectMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
 }

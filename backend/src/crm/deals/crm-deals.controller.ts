@@ -67,7 +67,7 @@ export class CrmDealsController {
     workDays?: number;
     managerId?: string;
   }) {
-    return this.dealsService.update(id, req.userId, data);
+    return this.dealsService.update(id, req.user.userId, data);
   }
 
   @Post(':id/log')
@@ -77,7 +77,7 @@ export class CrmDealsController {
     oldValue?: string;
     newValue?: string;
   }) {
-    return this.dealsService.addLog(id, req.userId, data);
+    return this.dealsService.addLog(id, req.user.userId, data);
   }
 
   @Get(':id/logs')

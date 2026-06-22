@@ -1,30 +1,41 @@
 import { useState } from 'react'
+import axios from 'axios'
 import CrmMain from './crm/CrmMain'
 
-const BRAND_LOGO_URL = 'https://static.tildacdn.com/tild6666-3335-4136-b866-376266373637/Group.svg'
+interface Props {
+  user: any
+  token: string
+  onLogout: () => void
+}
 
-function CrmOperatorDashboard({ user, token, onLogout }: { user: any, token: string, onLogout: () => void }) {
-  const [activeTab] = useState<'crm'>('crm')
+export default function CrmOperatorDashboard({ user, token, onLogout }: Props) {
+  const [activeTab, setActiveTab] = useState('crm')
 
   return (
-    <div className="gp-shell">
-      <div className="gp-header">
-        <div className="gp-brand">
-          <img src={BRAND_LOGO_URL} alt="Gastroprime" />
-          <div>
-            <div className="gp-brand-subtitle">CRM-оператор</div>
-          </div>
+    <div className="gp-app">
+      <header className="gp-header">
+        <div className="gp-header-title">
+          <a href="https://gastroprime.ru" className="gp-logo-link">
+            <img src="/logo.svg" alt="Gastroprime" className="gp-logo" />
+          </a>
+          <span className="gp-header-role">CRM Оператор</span>
         </div>
-        <div className="gp-header-right">
-          <span className="gp-top-pill">{user?.email}</span>
-          <button onClick={onLogout} style={{ padding: '10px 16px', background: '#1c1a18', color: 'white', border: 'none', borderRadius: 12 }}>Выйти</button>
+        <div className="gp-header-user">
+          <span className="gp-header-username">{user.name || user.email}</span>
+          <button onClick={onLogout} className="gp-btn gp-btn--small gp-btn--danger">Выйти</button>
+        </div>
+      </header>
+      <div className="gp-tabs">
+        <div
+          onClick={() => setActiveTab('crm')}
+          className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}
+        >
+          📋 CRM
         </div>
       </div>
       <div className="gp-content">
-        {activeTab === 'crm' && <CrmMain token={token} userRole={user.role} />}
+        {activeTab === 'crm' && <CrmMain token={token} userRole={user?.role} user={user} />}
       </div>
     </div>
   )
 }
-
-export default CrmOperatorDashboard

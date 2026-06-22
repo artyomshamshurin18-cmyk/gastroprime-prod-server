@@ -13,6 +13,7 @@ import AdminReconciliation from './AdminReconciliation'
 import AdminWeeklyMenus from './AdminWeeklyMenus'
 import AdminLogistics from './AdminLogistics'
 import CrmMain from './crm/CrmMain'
+import CrmOperatorDashboard from './CrmOperatorDashboard'
 import CompanyAnalytics from './CompanyAnalytics'
 import ClientCompanyDashboard from './ClientCompanyDashboard'
 import ClientCompanyRequests from './ClientCompanyRequests'
@@ -134,6 +135,33 @@ function Login({ onLogin }: { onLogin: (token: string, user: any) => void }) {
     }
   }
 
+  const handleRegister = async (data: { companyName: string; firstName: string; phone: string }) => {
+    if (!email || !password) {
+      setError("Введите email и пароль")
+      return
+    }
+    if (!data.companyName) {
+      setError("Введите название компании")
+      return
+    }
+    setError("")
+    setLoading(true)
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/register`, { email, password, ...data })
+      const token = response.data.access_token || response.data.token
+      const user = response.data.user
+      if (!token || !user) {
+        setError("Ошибка: не удалось создать компанию")
+        return
+      }
+      onLogin(token, user)
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка регистрации")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <PortalLoginExperience
       brandLogoUrl={BRAND_LOGO_URL}
@@ -144,6 +172,7 @@ function Login({ onLogin }: { onLogin: (token: string, user: any) => void }) {
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onLogin={handleLogin}
+      onRegister={handleRegister}
     />
   )
 }
@@ -276,6 +305,7 @@ function AdminDashboard({ user, token, onLogout }: { user: any, token: string, o
         <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
         <div onClick={() => setActiveTab('logistics')} className={`gp-tab ${activeTab === 'logistics' ? 'gp-tab--active' : ''}`}>🚚 Логистика</div>
         <div onClick={() => setActiveTab('kitchen')} className={`gp-tab ${activeTab === 'kitchen' ? 'gp-tab--active' : ''}`}>🍲 Сводка</div>
+        <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
       </div>
       <div className="gp-content">
         {activeTab === 'analytics' && <AdminAnalytics token={token} />}
@@ -297,7 +327,7 @@ function AdminDashboard({ user, token, onLogout }: { user: any, token: string, o
 }
 
 function ManagerDashboard({ user, token, onLogout, onImpersonate }: { user: any, token: string, onLogout: () => void, onImpersonate: (token: string, user: any) => void }) {
-  const [activeTab, setActiveTab] = useState<'clients' | 'client-plans' | 'planning' | 'companies' | 'users' | 'analytics' | 'reconciliation' | 'invoices' | 'categories' | 'dishes' | 'kitchen' | 'help'>('clients')
+  const [activeTab, setActiveTab] = useState<'clients' | 'client-plans' | 'planning' | 'companies' | 'users' | 'analytics' | 'reconciliation' | 'invoices' | 'categories' | 'dishes' | 'kitchen' | 'crm' | 'help'>('clients')
 
   return (
     <div className="gp-shell">
@@ -322,6 +352,7 @@ function ManagerDashboard({ user, token, onLogout, onImpersonate }: { user: any,
         <div onClick={() => setActiveTab('categories')} className={`gp-tab ${activeTab === 'categories' ? 'gp-tab--active' : ''}`}>🗂️ Категории</div>
         <div onClick={() => setActiveTab('dishes')} className={`gp-tab ${activeTab === 'dishes' ? 'gp-tab--active' : ''}`}>🍳 Блюда</div>
         <div onClick={() => setActiveTab('kitchen')} className={`gp-tab ${activeTab === 'kitchen' ? 'gp-tab--active' : ''}`}>🍲 Сводка</div>
+        <div onClick={() => setActiveTab('crm')} className={`gp-tab ${activeTab === 'crm' ? 'gp-tab--active' : ''}`}>📋 CRM</div>
         <div onClick={() => setActiveTab('help')} className={`gp-tab ${activeTab === 'help' ? 'gp-tab--active' : ''}`}>📘 Инструкция</div>
       </div>
       <div className="gp-content">
@@ -420,6 +451,7 @@ function App() {
   if (user.role === 'ADMIN' || user.role === 'SUPERADMIN') return <AdminDashboard user={user} token={token} onLogout={handleLogout} />
   if (user.role === 'MANAGER') return <ManagerDashboard user={user} token={token} onLogout={handleLogout} onImpersonate={handleImpersonate} />
   if (user.role === 'DRIVER') return <DriverDashboard user={user} token={token} onLogout={handleLogout} />
+  if (user.role === 'CRM_OPERATOR') return <CrmOperatorDashboard user={user} token={token} onLogout={handleLogout} />
   return <ClientDashboard user={user} token={token} onLogout={handleLogout} onUserUpdate={handleUserUpdate} impersonatorUser={impersonatorUser} onRestoreSession={handleRestoreSession} />
 }
 

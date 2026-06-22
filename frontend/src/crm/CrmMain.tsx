@@ -11,14 +11,13 @@ interface CrmMainProps {
   userRole: string;
 }
 
-type CrmTab = 'leads' | 'deals' | 'tasks' | 'routes' | 'dashboard' | 'projects';
+type CrmTab = 'leads' | 'deals' | 'tasks' | 'dashboard' | 'projects';
 
 const TABS: { id: CrmTab; label: string; icon: string }[] = [
   { id: 'leads', label: 'Лиды', icon: '📋' },
   { id: 'deals', label: 'Воронка', icon: '📊' },
   { id: 'tasks', label: 'Задачи', icon: '✅' },
   { id: 'projects', label: 'Проекты', icon: '📁' },
-  { id: 'routes', label: 'Доставка', icon: '🚚' },
   { id: 'dashboard', label: 'Дашборд', icon: '📈' },
 ];
 
@@ -61,7 +60,6 @@ export default function CrmMain({ token, userRole }: CrmMainProps) {
       case 'deals': return <CrmDealsKanban token={token} userRole={userRole} />;
       case 'tasks': return <CrmTasks token={token} userRole={userRole} />;
       case 'projects': return <CrmProjects token={token} userRole={userRole} />;
-      case 'routes': return <CrmRoutes token={token} userRole={userRole} />;
       case 'dashboard': return <CrmDashboard token={token} />;
       default: return null;
     }

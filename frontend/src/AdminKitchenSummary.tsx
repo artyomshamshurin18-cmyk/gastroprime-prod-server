@@ -277,7 +277,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
     }, {} as Record<string, typeof data.dishes>)).map(([category, dishes]) => `
       <div class="company-block">
         <h3>${category}</h3>
-        <div class="list">${dishes.map(dish => `${dish.dishName} × ${dish.totalQuantity} = ${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`).join(' • ')}</div>
+        <div class="list">${dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.totalQuantity} = ${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`).join(' • ')}</div>
       </div>
     `).join('')
 
@@ -311,14 +311,14 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
             <div class="meta">Заявок: ${company.selectionsCount} • Порций: ${company.totalPortions} • Приборов: ${company.utensilsTotal} • Хлеб: ${company.needBreadCount}</div>
             ${company.contactPerson ? `<div class="muted">Контакт: ${company.contactPerson}</div>` : ''}
             ${company.address ? `<div class="muted">Адрес: ${company.address}</div>` : ''}
-            ${company.entryConditions ? `<div class="muted">Заезд: ${company.entryConditions}</div>` : ''}
-            <div class="list">${company.dishes.map(dish => `${dish.dishName} × ${dish.quantity}`).join(' • ')}</div>
+            ${company.entryConditions ? `<div class="muted">Телефон: ${company.entryConditions}</div>` : ''}
+            <div class="list">${company.dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' • ')}</div>
             ${company.users.length ? `
               <div class="users">
                 ${company.users.map(user => `
                   <div class="user-row">
                     <strong>${user.userName}</strong> (${user.email})<br/>
-                    ${user.items.map(item => `${item.dishName} × ${item.quantity}`).join(' • ')}<br/>
+                    ${user.items.map(item => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' • ')}<br/>
                     <span class="muted">Приборов: ${user.utensils}, хлеб: ${user.needBread ? 'да' : 'нет'}${user.notes ? `, примечание: ${user.notes}` : ''}</span>
                   </div>
                 `).join('')}
@@ -419,7 +419,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                 ${company.contactPerson ? `<div class="contact-big">Контакт: ${company.contactPerson}</div>` : ''}
                 ${company.address ? `<div class="muted">Адрес: ${company.address}</div>` : ''}
                 ${company.address ? `<div class="nav-link">Навигация: <a href="${buildMapLink(company.address)}" target="_blank">Открыть маршрут</a></div>` : ''}
-                ${company.entryConditions ? `<div class="warn">Заезд: ${company.entryConditions}</div>` : ''}
+                ${company.entryConditions ? `<div class="warn">Телефон: ${company.entryConditions}</div>` : ''}
               </div>
               <div class="totals">
                 <div><strong>${company.totalPortions}</strong> порц.</div>
@@ -427,7 +427,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                 <div>Хлеб: <strong>${company.needBreadCount}</strong></div>
               </div>
             </div>
-            <div class="cargo">${company.dishes.map(dish => `${dish.dishName} × ${dish.quantity}`).join(' • ')}</div>
+            <div class="cargo">${company.dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' • ')}</div>
             <div class="checks">
               <span><span class="box"></span> Отгружено</span>
               <span><span class="box"></span> Доставлено</span>
@@ -512,7 +512,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                       ${company.contactPerson ? `<div class="contact-big">Контакт: ${company.contactPerson}</div>` : ''}
                       ${company.address ? `<div class="muted">Адрес: ${company.address}</div>` : ''}
                       ${company.address ? `<div class="nav-link">Навигация: <a href="${buildMapLink(company.address)}" target="_blank">Открыть маршрут</a></div>` : ''}
-                      ${company.entryConditions ? `<div class="warn">Заезд: ${company.entryConditions}</div>` : ''}
+                      ${company.entryConditions ? `<div class="warn">Телефон: ${company.entryConditions}</div>` : ''}
                     </div>
                     <div class="totals">
                       <div><strong>${company.totalPortions}</strong> порц.</div>
@@ -520,7 +520,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                       <div>Хлеб: <strong>${company.needBreadCount}</strong></div>
                     </div>
                   </div>
-                  <div class="cargo">${company.dishes.map(dish => `${dish.dishName} × ${dish.quantity}`).join(' • ')}</div>
+                  <div class="cargo">${company.dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' • ')}</div>
                   <div class="checks">
                     <span><span class="box"></span> Отгружено</span>
                     <span><span class="box"></span> Доставлено</span>
@@ -584,7 +584,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
             company: company.companyName,
             user: user.userName,
             email: user.email,
-            items: user.items.map(item => `${item.dishName} × ${item.quantity}`).join(' • '),
+            items: user.items.map(item => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' • '),
             utensils: user.utensils,
             bread: user.needBread ? 'Да' : 'Нет',
             note: user.notes || '',
@@ -715,7 +715,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                 {Object.entries(groupedProduction).map(([category, dishes]) => (
                   <div key={category} className="gp-soft-block" style={{ padding: 14 }}>
                     <strong style={{ display: 'block', marginBottom: 8 }}>{category}</strong>
-                    <div style={{ color: '#333' }}>{dishes.map(dish => `${dish.dishName} × ${dish.totalQuantity} = ${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`).join(' • ')}</div>
+                    <div style={{ color: '#333' }}>{dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.totalQuantity} = ${Number(dish.productionAmount || 0).toFixed(dish.measureUnit === 'PCS' ? 0 : 2)} ${dish.productionUnitLabel}`).join(' • ')}</div>
                   </div>
                 ))}
               </div>
@@ -732,7 +732,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                   <div key={dish.dishId} className="gp-soft-block" style={{ padding: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                       <div>
-                        <strong>{dish.dishName}</strong>
+                        <strong>{dish.dishName}{dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''}</strong>
                         <div style={{ color: '#666' }}>{dish.categoryName}</div>
                       </div>
                       <div style={{ fontWeight: 700, color: '#28a745', textAlign: 'right' }}>
@@ -779,7 +779,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                               <div style={{ color: '#666' }}>Заявок: {company.selectionsCount}</div>
                               {company.contactPerson && <div style={{ color: '#666', fontSize: 14 }}>Контакт: {company.contactPerson}</div>}
                               {company.address && <div style={{ color: '#666', fontSize: 14 }}>Адрес: {company.address}</div>}
-                              {company.entryConditions && <div style={{ color: '#8a6d3b', fontSize: 14 }}>Заезд: {company.entryConditions}</div>}
+                              {company.entryConditions && <div style={{ color: '#8a6d3b', fontSize: 14 }}>Телефон: {company.entryConditions}</div>}
                             </div>
                             <div style={{ textAlign: 'right' }}>
                               <div>Порций: <strong>{company.totalPortions}</strong></div>
@@ -788,7 +788,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                           </div>
 
                           <div style={{ marginBottom: 10, color: '#333' }}>
-                            {company.dishes.map(dish => `${dish.dishName} × ${dish.quantity}`).join(' • ')}
+                            {company.dishes.map(dish => `${dish.dishName}${dish.garnishDishName ? ' (' + dish.garnishDishName + ')' : ''} × ${dish.quantity}`).join(' • ')}
                           </div>
 
                           {company.companyId && (
@@ -827,7 +827,7 @@ export default function AdminKitchenSummary({ token }: { token: string }) {
                                     <div style={{ color: '#666', fontSize: 14 }}>{statusLabels[user.status] || user.status}</div>
                                   </div>
                                   <div style={{ marginTop: 6, color: '#333' }}>
-                                    {user.items.map(item => `${item.dishName} × ${item.quantity}`).join(' • ')}
+                                    {user.items.map(item => `${item.dishName}${item.garnishDishName ? ' (' + item.garnishDishName + ')' : ''} × ${item.quantity}`).join(' • ')}
                                   </div>
                                   <div style={{ marginTop: 6, color: '#666', fontSize: 14 }}>
                                     Приборов: {user.utensils}, хлеб: {user.needBread ? 'да' : 'нет'}

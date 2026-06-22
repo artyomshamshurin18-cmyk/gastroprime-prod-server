@@ -6,7 +6,7 @@ export class CrmDashboardService {
   constructor(private prisma: PrismaService) {}
 
   private async ensureAccess(user: any) {
-    if (!["SUPERADMIN", "ADMIN", "CRM_OPERATOR"].includes(user.role)) {
+    if (!["SUPERADMIN", "ADMIN", "CRM_OPERATOR", "MANAGER"].includes(user.role)) {
       throw new ForbiddenException('Только ADMIN может просматривать дашборд');
     }
   }
@@ -68,6 +68,47 @@ export class CrmDashboardService {
       _count: true,
     });
 
+    // Get total deals and amount
+    const dealTotals = await this.prisma.crmDeal.aggregate({
+      _count: { id: true },
+      _sum: { estimatedAmount: true },
+    });
+
+    // Get today tasks
+    const todayTasks = await this.prisma.crmTask.count({
+      where: { createdAt: { gte: startOfDay, lte: endOfDay } },
+    });
+    const todayCompletedTasks = await this.prisma.crmTask.count({
+      where: { completedAt: { gte: startOfDay, lte: endOfDay } },
+    });
+
+    // Get deals by stage with amounts
+    const dealsByStage = await this.prisma.crmDeal.groupBy({
+      by: ['stage'],
+      _count: { id: true },
+      _sum: { estimatedAmount: true },
+    });
+
+    // Get recent deals
+    const recentDeals = await this.prisma.crmDeal.findMany({
+      take: 6,
+      orderBy: { createdAt: 'desc' },
+      include: { company: { select: { name: true } } },
+    });
+
+    // Get upcoming tasks
+    const upcomingTasks = await this.prisma.crmTask.findMany({
+      where: { dueDate: { gte: new Date() }, completedAt: null },
+      take: 6,
+      orderBy: { dueDate: 'asc' },
+      select: { title: true, description: true, status: true, priority: true, dueDate: true, userId: true, dealId: true },
+    });
+
+    // Get today routes
+    const todayRoutes = await this.prisma.crmRoute.count({
+      where: { date: { gte: startOfDay, lte: endOfDay } },
+    });
+
     return {
       activeCompanies,
       todayOrders: todayOrders.length,
@@ -82,11 +123,34 @@ export class CrmDashboardService {
         totalSelections: productionArr.length,
       },
       funnel: funnelStages.reduce((acc: any, s: any) => ({ ...acc, [s.stage]: s._count }), {}),
+      totalDeals: dealTotals._count?.id || 0,
+      totalAmount: dealTotals._sum?.estimatedAmount || 0,
+      todayTasks,
+      todayCompletedTasks,
+      todayRoutes,
+      dealsByStage: dealsByStage.map((ds: any) => ({
+        stage: ds.stage,
+        count: ds._count?.id || 0,
+        amount: ds._sum?.estimatedAmount || 0,
+      })),
+      recentDeals: recentDeals.map((d: any) => ({
+        id: d.id,
+        companyName: d.company?.name || '',
+        stage: d.stage,
+        amount: d.estimatedAmount,
+        createdAt: d.createdAt,
+      })),
+      upcomingTasks: upcomingTasks.map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        dueDate: t.dueDate,
+        dealName: t.deal?.company?.name || '',
+      })),
     };
   }
 
   async getFunnel() {
-    const stages = ['LEAD', 'CONTACT_ESTABLISHED', 'TASTING_SCHEDULED', 'TASTING_DONE', 'NEGOTIATION', 'CONTRACT'];
+    const stages = ['LEAD', 'CONTACT_ESTABLISHED', 'TASTING_SCHEDULED', 'TASTING_DONE', 'NEGOTIATION', 'CONTRACT', 'LOST'];
     const counts = await this.prisma.crmDeal.groupBy({
       by: ['stage'],
       _count: true,

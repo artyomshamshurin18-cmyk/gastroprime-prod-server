@@ -17,6 +17,14 @@ const priceSegmentOptions = [
   { value: 'PRIME', label: 'Прайм' },
 ]
 
+const roleLabels: Record<string, string> = {
+  CLIENT: 'Сотрудник',
+  MASTER_CLIENT: 'Координатор',
+}
+const roleColors: Record<string, string> = {
+  CLIENT: '#6c757d',
+  MASTER_CLIENT: '#007bff',
+}
 const companyStatusColors: Record<string, string> = {
   ACTIVE: '#28a745',
   ONBOARDING: '#ffc107',
@@ -43,7 +51,7 @@ interface Company {
   routeName?: string
   accountNumber?: string
   deliveryTime?: string
-  peopleCount?: number | null
+  peopleCount?: string
   notes?: string
   mealPlan?: string
   workEmail?: string
@@ -63,6 +71,18 @@ interface Company {
   }
 }
 
+interface CompanyUser {
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  jobTitle: string | null
+  phone: string | null
+  role: string
+  status: string
+  createdAt: string
+}
+
 interface CategoryOption {
   id: string
   name: string
@@ -78,7 +98,7 @@ interface CompanyDraft {
   entryConditions: string
   routeName: string
   deliveryTime: string
-  peopleCount: number
+  peopleCount: string
   notes: string
   mealPlan: string
   workEmail: string
@@ -100,7 +120,7 @@ const emptyCompanyForm: CompanyDraft = {
   entryConditions: '',
   routeName: '',
   deliveryTime: '',
-  peopleCount: 0,
+  peopleCount: '',
   notes: '',
   mealPlan: 'Обед',
   workEmail: '',
@@ -143,6 +163,9 @@ export default function AdminCompanies({ token }: { token: string }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [billingSettings, setBillingSettings] = useState<BillingSettingsDraft>(emptyBillingSettings)
   const [savingBillingSettings, setSavingBillingSettings] = useState(false)
+  const [companyUsers, setCompanyUsers] = useState<Record<string, CompanyUser[]>>({})
+  const [loadingUsers, setLoadingUsers] = useState<Record<string, boolean>>({})
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null)
 
   const loadCompanies = async () => {
     setLoading(true)
@@ -180,7 +203,7 @@ export default function AdminCompanies({ token }: { token: string }) {
           entryConditions: company.entryConditions || '',
           routeName: company.routeName || '',
           deliveryTime: company.deliveryTime || '',
-          peopleCount: company.peopleCount || 0,
+          peopleCount: company.peopleCount || '',
           notes: company.notes || '',
           mealPlan: company.mealPlan || 'Обед',
           workEmail: company.workEmail || '',
@@ -283,6 +306,37 @@ export default function AdminCompanies({ token }: { token: string }) {
     }))
   }
 
+  const loadCompanyUsers = async (companyId: string) => {
+    setLoadingUsers(prev => ({ ...prev, [companyId]: true }))
+    try {
+      const res = await axios.get(`${API_URL}/admin/companies/${companyId}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setCompanyUsers(prev => ({ ...prev, [companyId]: res.data }))
+    } catch (err) {
+      console.error(err)
+      setMessage('❌ Не удалось загрузить сотрудников')
+    } finally {
+      setLoadingUsers(prev => ({ ...prev, [companyId]: false }))
+    }
+  }
+
+  const changeUserRole = async (userId: string, companyId: string, newRole: string) => {
+    setUpdatingRole(userId)
+    try {
+      await axios.patch(`${API_URL}/admin/companies/${companyId}/users/${userId}/role`, { role: newRole }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setMessage('✅ Роль обновлена')
+      await loadCompanyUsers(companyId)
+    } catch (err: any) {
+      console.error(err)
+      setMessage(`❌ ${err.response?.data?.message || 'Не удалось изменить роль'}`)
+    } finally {
+      setUpdatingRole(null)
+    }
+  }
+
   const updateCategoryPrice = (form: CompanyDraft, categoryId: string, value: string, apply: (next: CompanyDraft) => void) => {
     apply({
       ...form,
@@ -322,10 +376,13 @@ export default function AdminCompanies({ token }: { token: string }) {
         <input placeholder="Контактное лицо" value={form.contactPerson} onChange={(e) => onChange('contactPerson', e.target.value)} />
         <input placeholder="Адрес компании" value={form.address} onChange={(e) => onChange('address', e.target.value)} />
         <input placeholder="Юридический адрес для счета" value={form.billingAddress} onChange={(e) => onChange('billingAddress', e.target.value)} />
-        <input placeholder="Условия заезда на территорию" value={form.entryConditions} onChange={(e) => onChange('entryConditions', e.target.value)} />
+        <input placeholder="Телефон" value={form.entryConditions} onChange={(e) => onChange('entryConditions', e.target.value)} />
         <input placeholder="Рейс / маршрут" value={form.routeName} onChange={(e) => onChange('routeName', e.target.value)} />
         <input placeholder="Окно доставки, например 10:00-12:00" value={form.deliveryTime} onChange={(e) => onChange('deliveryTime', e.target.value)} />
-        <input placeholder="Количество питающихся" type="number" value={form.peopleCount} onChange={(e) => onChange('peopleCount', parseInt(e.target.value) || 0)} />
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 14, color: '#4b3a30', fontWeight: 600 }}>Количество питающихся</span>
+          <input type="text" value={form.peopleCount} onChange={(e) => onChange('peopleCount', e.target.value)} />
+        </label>
         <input placeholder="Особые отметки" value={form.notes} onChange={(e) => onChange('notes', e.target.value)} />
         <select value={form.mealPlan} onChange={(e) => onChange('mealPlan', e.target.value)}>
           {mealPlanOptions.map(option => <option key={option} value={option}>{option}</option>)}
@@ -335,9 +392,18 @@ export default function AdminCompanies({ token }: { token: string }) {
         <select value={form.priceSegment} onChange={(e) => onChange('priceSegment', e.target.value)}>
           {priceSegmentOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
-        <input placeholder="Баланс" type="number" value={form.balance} onChange={(e) => onChange('balance', parseInt(e.target.value) || 0)} />
-        <input placeholder="Лимит" type="number" value={form.limit} onChange={(e) => onChange('limit', parseInt(e.target.value) || 0)} />
-        <input placeholder="Лимит в день" type="number" value={form.dailyLimit} onChange={(e) => onChange('dailyLimit', parseInt(e.target.value) || 0)} />
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 14, color: '#4b3a30', fontWeight: 600 }}>Баланс, руб</span>
+          <input type="number" min={0} value={form.balance} onChange={(e) => onChange('balance', parseInt(e.target.value) || 0)} />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 14, color: '#4b3a30', fontWeight: 600 }}>Общий лимит, руб</span>
+          <input type="number" min={0} value={form.limit} onChange={(e) => onChange('limit', parseInt(e.target.value) || 0)} />
+        </label>
+        <label style={{ display: 'grid', gap: 4 }}>
+          <span style={{ fontSize: 14, color: '#4b3a30', fontWeight: 600 }}>Дневной лимит, руб</span>
+          <input type="number" min={0} value={form.dailyLimit} onChange={(e) => onChange('dailyLimit', parseInt(e.target.value) || 0)} />
+        </label>
       </div>
       <textarea placeholder="Реквизиты компании для счета" value={form.billingDetails} onChange={(e) => onChange('billingDetails', e.target.value)} rows={4} style={{ width: '100%', marginTop: 12 }} />
       {categories.length > 0 && (
@@ -409,7 +475,12 @@ export default function AdminCompanies({ token }: { token: string }) {
           return (
             <div key={company.id} className="gp-surface-card" style={{ marginBottom: 8, overflow: 'hidden' }}>
               <div
-                onClick={() => setExpandedId(isExpanded ? null : company.id)}
+                onClick={() => {
+                  if (!isExpanded && !companyUsers[company.id]) {
+                    loadCompanyUsers(company.id)
+                  }
+                  setExpandedId(isExpanded ? null : company.id)
+                }}
                 style={{
                   padding: '14px 20px',
                   cursor: 'pointer',
@@ -446,6 +517,53 @@ export default function AdminCompanies({ token }: { token: string }) {
                     <button onClick={() => deleteCompany(company.id, company.name)} disabled={deletingId === company.id} style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: 6, padding: '10px 18px' }}>
                       {deletingId === company.id ? 'Удаляю...' : 'Удалить компанию'}
                     </button>
+                  </div>
+
+                  <div style={{ marginTop: 24, borderTop: '1px solid #eee', paddingTop: 16 }}>
+                    <h4 style={{ margin: '0 0 12px 0', fontSize: 14 }}>Сотрудники ({company._count?.users || 0})</h4>
+                    {loadingUsers[company.id] ? (
+                      <p style={{ fontSize: 13, color: '#999' }}>Загрузка...</p>
+                    ) : companyUsers[company.id]?.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {companyUsers[company.id].map((u) => (
+                          <div key={u.id} style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '8px 12px', background: '#f9f9f9', borderRadius: 8, fontSize: 13
+                          }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <strong>{[u.firstName, u.lastName].filter(Boolean).join(' ') || u.email}</strong>
+                              {u.jobTitle && <span style={{ color: '#888', marginLeft: 8 }}>{u.jobTitle}</span>}
+                              <div style={{ color: '#aaa', fontSize: 12 }}>{u.email}</div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <select
+                                value={u.role}
+                                onChange={(e) => changeUserRole(u.id, company.id, e.target.value)}
+                                disabled={updatingRole === u.id}
+                                style={{
+                                  fontSize: 12, padding: '4px 8px', borderRadius: 4, border: '1px solid #ddd',
+                                  background: '#fff', cursor: 'pointer'
+                                }}
+                              >
+                                {Object.entries(roleLabels).map(([value, label]) => (
+                                  <option key={value} value={value}>{label}</option>
+                                ))}
+                              </select>
+                              <span style={{
+                                fontSize: 11, padding: '2px 8px', borderRadius: 4,
+                                background: (roleColors[u.role] || '#888') + '18',
+                                color: roleColors[u.role] || '#888',
+                                fontWeight: 600
+                              }}>
+                                {updatingRole === u.id ? '...' : roleLabels[u.role] || u.role}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: 13, color: '#aaa' }}>Нет сотрудников</p>
+                    )}
                   </div>
                 </div>
               )}
