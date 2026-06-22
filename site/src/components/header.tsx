@@ -14,12 +14,13 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-16">
         <Link href="/" className="flex shrink-0 items-center -my-6">
-          <img src="/gastroprime-logo-header.png" alt="GastroPrime" className="h-24 w-auto sm:h-28" />
+          <img src="/gastroprime-logo-header.png" alt="Gastroprime" className="h-24 w-auto sm:h-28" />
         </Link>
         <nav className="hidden items-center gap-5 text-sm font-medium text-slate-300 lg:flex">
           <Link href="/" className="transition hover:text-amber-400">Главная</Link>
           <Link href="/#solutions" className="transition hover:text-amber-400">Решения</Link>
           <Link href="/quality" className="transition hover:text-amber-400">Качество</Link>
+          <Link href="/events" className="transition hover:text-amber-400">Кейтеринг</Link>
           <Link href="/cases" className="transition hover:text-amber-400">Кейсы</Link>
           <Link href="/about" className="transition hover:text-amber-400">О компании</Link>
           <Link href="/contacts" className="transition hover:text-amber-400">Контакты</Link>

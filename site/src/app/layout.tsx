@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+
 import Script from "next/script";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -8,10 +8,10 @@ import { SocialSidebar } from "@/components/social-sidebar";
 import { localBusinessJsonLd } from "@/lib/seo";
 import "./globals.css";
 
-const manrope = Manrope({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-manrope",
-});
+const manrope = {
+  variable: "manrope_b757649e-module__VxvIbG__className",
+  className: "",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -19,77 +19,54 @@ export const metadata: Metadata = {
     default: `${company.name}, корпоративное питание`,
     template: `%s | ${company.name}`,
   },
-  description:
-    "GastroPrime — корпоративное питание в Москве и МО. Доставка обедов в офисы, на стройки, склады и производства.",
+  description: "Корпоративное питание в Москве и Московской области. Доставка обедов в офисы, на стройки, склады, производства. Собственное производство, HACCP, своя логистика.",
   openGraph: {
     title: `${company.name}, корпоративное питание`,
-    description:
-      "Новый каркас сайта для офисов, складов, строек, производств и госучреждений.",
-    url: siteUrl,
+    description: "Корпоративное питание в Москве и МО. Доставка обедов в офисы, стройки, склады.",
     siteName: company.name,
     locale: "ru_RU",
     type: "website",
   },
+  twitter: {
+    card: "summary",
+    title: `${company.name}, корпоративное питание`,
+    description: "Корпоративное питание в Москве и МО.",
+  },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
-function ogFallbackScript() {
-  return {
-    __html:
-      'if(!document.head.querySelector(\'[property="og:title"]\')){' +
-      "var t=document.createElement('meta');" +
-      "t.setAttribute('property','og:title');" +
-      "t.setAttribute('content','GastroPrime, корпоративное питание');" +
-      'document.head.appendChild(t);' +
-      "var d=document.createElement('meta');" +
-      "d.setAttribute('property','og:description');" +
-      "d.setAttribute('content','Корпоративное питание в Москве и МО');" +
-      'document.head.appendChild(d);' +
-      "var s=document.createElement('meta');" +
-      "s.setAttribute('property','og:site_name');" +
-      "s.setAttribute('content','GastroPrime');" +
-      'document.head.appendChild(s);}',
-  };
-}
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const jsonLd = localBusinessJsonLd();
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
       <head>
-        <noscript>
-          <div>
-            <img src="https://mc.yandex.ru/watch/110067517" style={{ position: "absolute", left: -9999 }} alt="" />
-          </div>
-        </noscript>
+        <meta name="yandex-verification" content="0dd75689c0c28081" />
       </head>
       <body className={`${manrope.variable} ${manrope.className} bg-slate-50 text-slate-950 antialiased`}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <script
-          type="text/javascript"
-          dangerouslySetInnerHTML={ogFallbackScript()}
-        />
-        <Script id="yandex-metrika" strategy="afterInteractive">
-          {`(function(m,e,t,r,i,k,a){
- m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
- m[i].l=1*new Date();
- for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
- k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
- })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=110067517', 'ym');
-
- ym(110067517, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer"});`}
-        </Script>
+        <nav aria-label="Skip links">
+          <a href="#main-content" className="sr-only focus:not-sr-only">Перейти к содержанию</a>
+        </nav>
         <Header />
         <SocialSidebar />
-        {children}
+        <main id="main-content">{children}</main>
         <Footer />
+        <Script
+          id="ld-json-local-business"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+        />
+        <Script id="og-fallback">
+          {`if(!document.head.querySelector('[property="og:title"]')){
+            var t=document.createElement('meta');t.setAttribute('property','og:title');t.setAttribute('content','Gastroprime, корпоративное питание');document.head.appendChild(t);
+            var d=document.createElement('meta');d.setAttribute('property','og:description');d.setAttribute('content','Корпоративное питание в Москве и МО');document.head.appendChild(d);
+            var s=document.createElement('meta');s.setAttribute('property','og:site_name');s.setAttribute('content','Gastroprime');document.head.appendChild(s);
+          }`}
+        </Script>
       </body>
     </html>
   );
